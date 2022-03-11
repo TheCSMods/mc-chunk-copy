@@ -1,0 +1,6 @@
+{
+	"thecsdev.chunkcopy.requiresingleplayer":"You need to be in single-player in order to do this.",
+	"thecsdev.chunkcopy.copiedchunks":"Copied chunk data to '{$fileName}'.",
+	"thecsdev.chunkcopy.pastedchunks":"Pasted chunk data from '{$fileName}'.",
+	"thecsdev.chunkcopy.exception":"An Exception was thrown during the operation: {$message}"
+}

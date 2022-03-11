@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "chunkcopy",
+	"version": "${version}",
+
+	"name": "Chunk Copy",
+	"description": "A Minecraft mod that downloads worlds from from multiplayer servers.",
+	"authors": ["TheCSDev"],
+	"contact":
+	{
+		"homepage": "https://github.com/TheCSDev",
+		"sources": "https://github.com/TheCSDev/mc-chunk-copy",
+		"issues": "https://github.com/TheCSDev/mc-chunk-copy/issues"
+	},
+
+	"license": "GPL-3.0-or-later",
+	"icon": "assets/chunkcopy/icon.png",
+
+	"environment": "client",
+	"entrypoints":
+	{
+		"client": ["thecsdev.chunkcopy.ChunkCopy"]
+	},
+	"mixins": ["chunkcopy.mixins.json"],
+
+	"depends":
+	{
+		"fabricloader": ">=0.12.12",
+		"fabric": "*",
+		"minecraft": "1.18.x",
+		"java": ">=17"
+	},
+	"suggests":
+	{
+		"another-mod": "*"
+	}
+}
