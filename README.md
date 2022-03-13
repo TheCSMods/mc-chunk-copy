@@ -1,15 +1,22 @@
 ## Chunk Copy
-Chunk Copy is a Minecraft (Fabric) mod used to download multiplayer Minecraft worlds by copying world chunks from those worlds and pasting them into singleplayer worlds. This mod made for Minecraft versions 1.18.X.
+Chunk Copy is a Fabric Minecraft mod used for downloading multiplayer worlds by copying their chunks and pasting them into singleplayer worlds. This mod adds a client-side command `/chunkcopy` that is used to copy and paste world chunks. All copied world chunks are stored in the `mods/chunkcopy` directory.
 
 ## How to use the mod?
-This mod adds a client-side command `/chunkcopy` that is used to copy and paste chunk data. Chunks can be copied at any time in both singleplayer and multiplayer worlds. Pasting chunks, on the other hand, can only be done in singleplayer worlds that have cheats enabled.<br/><br/>
-Please be careful when executing the paste commmand, as it cannot be undone. This is why cheats are required to be enabled before pasting, to avoid accidentally damaging casual survival worlds.<br/><br/>
-The command syntax is: `/chunkcopy (copy/paste) <file_name> [chunk_distance]`<br/>
-* `file_name` (required)<br/>is the name of the directory where the chunk data will be saved to and loaded from. All copied chunk data is stored in `[.minecraft]/mods/chunkcopy/[file_name]`.
-* `chunk_distance` (optional)<br/>is kind of like render distance, as it defines how close the chunk has to be in order to be copied/pasted. Set this to `0` or `1` to copy or paste a single chunk in which the player is located in. Avoid using high values and high render distances as they will cause lots of lag and may even freeze and crash the game.
-
-To copy chunks, log in on the desired Minecraft server, and go to the area that you wish to copy. Make sure that the chunks you wish to copy are loaded client-side. Then execute the copying command (ex. `/chunkcopy copy Test`).<br/><br/>
-To paste chunks, go to a singleplayer world with cheats enabled (it is preferred that you create a new empty world with the void preset), then go to the exact same coordinates of where the chunks are located on the server, and execute the pasting command (ex. `/chunkcopy paste Test`).
+This mod adds a client-side command `/chunkcopy` that is used to copy and paste chunk data. Chunks can be copied at any time in both singleplayer and multiplayer worlds. Pasting chunks, on the other hand, can only be done in singleplayer worlds that have cheats enabled.<br/>
+<br/>
+<i><b>Please be careful when executing the mod commands, as they cannot be undone. This is why cheats are required to be enabled before pasting, to avoid accidentally damaging casual survival worlds.</i></b><br/>
+<br/>
+#### Command syntaxes:
+* /chunkcopy (copy/paste) &lt;file_name&gt; [chunk_distance]
+* /chunkcopy fill &lt;chunk_distance&gt; &lt;block&gt;
+* /chunkcopy clear &lt;chunk_distance&gt;
+<br/>
+<ins><b>file_name</b></ins> - This is the name of the directory where the chunk data will be saved to and loaded from. All copied chunk data is stored in `[.minecraft]/mods/chunkcopy/[file_name]`.<br/>
+<ins><b>chunk_distance</b></ins> - This is kind of like render distance, as it defines how close the chunk has to be in order to be copied/pasted. Set this to `0` or `1` to copy or paste a single chunk in which the player is located in. Avoid using high values and high render distances as they will cause lots of lag and may even freeze and crash the game.<br/>
+<ins><b>block</b></ins> - The desired block type.<br/>
+<br/>
+<b>To copy chunks</b>, log in on the desired Minecraft server, and go to the area that you wish to copy. Make sure that the chunks you wish to copy are loaded client-side. Then execute the copying command (ex. `/chunkcopy copy Test`).<br/>
+<b>To paste chunks</b>, go to a singleplayer world with cheats enabled (it is preferred that you create a new empty world with the void preset), then go to the exact same coordinates of where the chunks are located on the server, and execute the pasting command (ex. `/chunkcopy paste Test`).
 
 ## Some questions and answers
 
