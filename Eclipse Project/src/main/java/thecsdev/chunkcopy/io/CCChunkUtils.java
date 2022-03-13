@@ -4,20 +4,26 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.light.LightingProvider;
 import thecsdev.chunkcopy.ChunkCopy;
+import thecsdev.chunkcopy.ChunkNotLoadedException;
 
 /**
  * Provides utility methods related to chunk copying/pasting for the {@link ChunkCopy} mod.
@@ -69,9 +75,15 @@ public final class CCChunkUtils
 	 * In other words, this is like pasting chunk blocks to a chunk.
 	 * @param blockIDs The block ID array.
 	 * @param startY The starting Y level of the blockIDs. Usually toChunk.getBottomY();
+	 * @throws ChunkNotLoadedException 
 	 */
 	public static void blockIDsToChunk(int[] blockIDs, World world, ChunkPos chunkPos, int startY)
+	throws ChunkNotLoadedException
 	{
+		//check if chunk loaded
+		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
+			throw new ChunkNotLoadedException(world, chunkPos);
+		
 		//define stuff
 		Chunk toChunk = world.getChunk(chunkPos.getBlockPos(0, 0, 0));
 		int chunkWidthX = Math.abs(chunkPos.getEndX() - chunkPos.getStartX());
@@ -90,17 +102,14 @@ public final class CCChunkUtils
 			{
 				do
 				{
-					//ignore blocks below bedrock (in case of a downgrade from 1.18+ to lower versions?)
-					if(y < toChunk.getBottomY()) break;
+					//ignore blocks below bedrock and above build limit
+					if(y < toChunk.getBottomY() || y > toChunk.getTopY())
+						break;
 					
 					//get state, section, and local coords
 					BlockState state = Block.getStateFromRawId(blockID);
 					ChunkSection toChunkSection = toChunk.getSection(toChunk.getSectionIndex(y));
-				    
-				    int localX = x;
-				    int localY = y & 0xF;
-				    int localZ = z;
-				    
+				    int localX = x, localY = y & 0xF, localZ = z;
 					toChunkSection.setBlockState(localX, localY, localZ, state);
 				}
 				while(false);
@@ -167,13 +176,19 @@ public final class CCChunkUtils
 	}
 	// --------------------------------------------------
 	/**
-	 * Loads all entity block data from a byte array to a byte array.<br/>
+	 * Loads all entity block data from a byte array to a chunk.<br/>
 	 * See there RIFF format here: {@link #chunkEntityBlocksToBytes(Chunk)}.
 	 * @throws IOException If an IO exception occurs.
+	 * @throws ChunkNotLoadedException 
 	 * @throws CommandSyntaxException When an entity block NBT data is invalid. 
 	 */
-	public static void bytesToChunkEntityBlocks(byte[] bytes, World world, ChunkPos chunkPos) throws IOException
+	public static void bytesToChunkEntityBlocks(byte[] bytes, World world, ChunkPos chunkPos)
+	throws IOException, ChunkNotLoadedException
 	{
+		//check if chunk loaded
+		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
+			throw new ChunkNotLoadedException(world, chunkPos);
+		
 		//create stream
 		ByteArrayInputStream chunkBytes = new ByteArrayInputStream(bytes);
 		
@@ -211,6 +226,72 @@ public final class CCChunkUtils
 		
 		//close and end
 		chunkBytes.close();
+	}
+	// ==================================================
+	/**
+	 * Sets all blocks in a chunk to the specified block state.
+	 * @throws ChunkNotLoadedException
+	 */
+	public static void fillChunkBlocks(World world, ChunkPos chunkPos, BlockState state) throws ChunkNotLoadedException
+	{
+		//check if chunk loaded
+		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
+			throw new ChunkNotLoadedException(world, chunkPos);
+		
+		//calculate stuff
+		Chunk chunk = world.getChunk(chunkPos.getBlockPos(0, 0, 0));
+		
+		int chunkWidthX = Math.abs(chunkPos.getEndX() - chunkPos.getStartX());
+		int chunkWidthZ = Math.abs(chunkPos.getEndZ() - chunkPos.getStartZ());
+		
+		//iterate all blocks in the chunk and set them all to air
+		int x = 0, y = chunk.getBottomY(), z = 0;
+		while(y < chunk.getTopY() + 1)
+		{
+			try
+			{
+				//set block
+				ChunkSection toChunkSection = chunk.getSection(chunk.getSectionIndex(y));
+			    int localX = x, localY = y & 0xF, localZ = z;
+				toChunkSection.setBlockState(localX, localY, localZ, state);
+				
+				//increment
+				x++;
+				if(x > chunkWidthX)
+				{
+					z++; x = 0;
+					if(z > chunkWidthZ) { y++; z = 0; }
+				}
+			}
+			catch (Exception e) { break; }
+		}
+		
+		//mark as should save
+		chunk.setShouldSave(true);
+	}
+	// ==================================================
+	/**
+	 * Refreshes a loaded chunk on the client side by sending a
+	 * {@link ChunkDataS2CPacket} letting the client know what
+	 * changes were made on that chunk.
+	 */
+	public static boolean sendChunkDataS2CPacket(World world, ChunkPos chunkPos)
+	{
+		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z)) return false;
+		MinecraftClient MC = MinecraftClient.getInstance();
+		
+		if(!world.isClient && MC.isInSingleplayer())
+		{
+			WorldChunk chunk = world.getChunk(chunkPos.x, chunkPos.z);
+			LightingProvider lp = world.getLightingProvider();
+			BitSet skyBits = new BitSet(0);
+			BitSet blockBits = new BitSet(0);
+			ChunkDataS2CPacket cd = new ChunkDataS2CPacket(chunk, lp, skyBits, blockBits, true);
+			
+			MC.getServer().getPlayerManager().sendToAll(cd);
+			return true;
+		}
+		else return false;
 	}
 	// ==================================================
 }
