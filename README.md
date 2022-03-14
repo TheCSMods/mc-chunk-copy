@@ -3,6 +3,8 @@ Chunk Copy is a Fabric Minecraft mod used for downloading multiplayer worlds by 
   
 - **Warning:** This mod does not feature a way to undo and redo changes made to chunks. Please be careful as any wrong moves made cannot be undone.
 
+You can download this mod over on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/chunk-copy-fabric) and on [Modrinth](https://modrinth.com/mod/chunk-copy-fabric).
+
 ## Command syntaxes:
 - /chunkcopy (copy/paste) &lt;file_name&gt; [chunk_distance]
 - /chunkcopy fill &lt;chunk_distance&gt; &lt;block&gt;
