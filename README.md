@@ -1,22 +1,26 @@
 ## Chunk Copy
-Chunk Copy is a Fabric Minecraft mod used for downloading multiplayer worlds by copying their chunks and pasting them into singleplayer worlds. This mod adds a client-side command `/chunkcopy` that is used to copy and paste world chunks. All copied world chunks are stored in the `mods/chunkcopy` directory.
+Chunk Copy is a Fabric Minecraft mod used for downloading multiplayer worlds by copying their chunks and pasting them into singleplayer worlds. This mod adds a client-side command `/chunkcopy` that is used to copy and paste world chunks. All copied world chunks are stored in the `mods/chunkcopy` directory.  
+  
+- **Warning:** This mod does not feature a way to undo and redo changes made to chunks. Please be careful as any wrong moves made cannot be undone.
 
-## How to use the mod?
-This mod adds a client-side command `/chunkcopy` that is used to copy and paste chunk data. Chunks can be copied at any time in both singleplayer and multiplayer worlds. Pasting chunks, on the other hand, can only be done in singleplayer worlds that have cheats enabled.<br/>
-<br/>
-<i><b>Please be careful when executing the mod commands, as they cannot be undone. This is why cheats are required to be enabled before pasting, to avoid accidentally damaging casual survival worlds.</i></b><br/>
-<br/>
-#### Command syntaxes:
-* /chunkcopy (copy/paste) &lt;file_name&gt; [chunk_distance]
-* /chunkcopy fill &lt;chunk_distance&gt; &lt;block&gt;
-* /chunkcopy clear &lt;chunk_distance&gt;
-<br/>
-<ins><b>file_name</b></ins> - This is the name of the directory where the chunk data will be saved to and loaded from. All copied chunk data is stored in `[.minecraft]/mods/chunkcopy/[file_name]`.<br/>
-<ins><b>chunk_distance</b></ins> - This is kind of like render distance, as it defines how close the chunk has to be in order to be copied/pasted. Set this to `0` or `1` to copy or paste a single chunk in which the player is located in. Avoid using high values and high render distances as they will cause lots of lag and may even freeze and crash the game.<br/>
+## Command syntaxes:
+- /chunkcopy (copy/paste) &lt;file_name&gt; [chunk_distance]
+- /chunkcopy fill &lt;chunk_distance&gt; &lt;block&gt;
+- /chunkcopy clear &lt;chunk_distance&gt;
+  
+<ins><b>file_name</b></ins> - This is the name of the directory where the chunk data will be saved to and loaded from. All copied chunks are stored in the <i>mods/chunkcopy/[file_name]/</i> directory.<br/>
+<ins><b>chunk_distance</b></ins> - This is kind of like render distance. It defines how close the chunk has to be in order to be copied or pasted. Set this to `1` to copy or paste a single chunk in which you are located in. By default, this value depends on the render distance. Because large chunk distances cause massive lag and the game to freeze due to so many blocks being affected all at once, this value is cannot go over 8.<br/>
 <ins><b>block</b></ins> - The desired block type.<br/>
-<br/>
-<b>To copy chunks</b>, log in on the desired Minecraft server, and go to the area that you wish to copy. Make sure that the chunks you wish to copy are loaded client-side. Then execute the copying command (ex. `/chunkcopy copy Test`).<br/>
-<b>To paste chunks</b>, go to a singleplayer world with cheats enabled (it is preferred that you create a new empty world with the void preset), then go to the exact same coordinates of where the chunks are located on the server, and execute the pasting command (ex. `/chunkcopy paste Test`).
+
+## Some extra info
+To copy chunks, log in on the desired Minecraft server, and go to the area that you wish to copy. Make sure that the chunks you wish to copy are loaded. Then execute the copying command (ex. /chunkcopy copy Test).  
+  
+To paste chunks, go to a singleplayer world that has cheats enabled (it is preferred that you create a new empty superflat world with the void preset), then go to the exact same coordinates of where the chunks you copied are located on the server, and execute the pasting command (ex. /chunkcopy paste Test).  
+  
+Please note that due to the way Minecraft works, it is impossible to write a client-side mod that is able to obtain and copy data such as worldgen settings (ie. the seed, world type, and so on) and contents of containers (such as chests, hoppers, and so on). Those things are handled server-side, which is why the client is not able to obtain such information. When it comes to containers such as chests, the only way to see their contents is to manually open them one by one. You may also experience lag spikes while copying and pasting chunks.  
+  
+Here is a short YouTube clip showing how the mod works (click the image):<br/>
+[![Chunk Copy demonstration](https://img.youtube.com/vi/mg6rYM5OuMg/0.jpg)](https://www.youtube.com/watch?v=mg6rYM5OuMg)
 
 ## Some questions and answers
 
