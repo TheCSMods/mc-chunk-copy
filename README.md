@@ -40,3 +40,10 @@ Here is a short YouTube clip showing how the mod works (click the image):<br/>
 
 #### Where are the copied chunks stored?
 * In this directory: `[.minecraft]/mods/chunkcopy/`
+
+#### Why copy and then go to a singleplayer world to paste instead of just copying directly to a singleplayer world right away?
+* Unfortunately, I have started learning modding about a month or two ago, and this is the 2nd mod I ever wrote. It is because of this that I simply do not have the experience to make such features yet, although I wish I did. Also, such feature would come with a risk of data loss and world corruption whenever something goes wrong during an IO operation.
+
+#### I pasted some chunks, but the lighting is weird, and also, the blocks aren't updating. Why?
+* If you ever tried using the `/fill` command to fill large areas, you may have noticed that doing that is very laggy. This is because the `/fill` and `/setblock` commands take care of lighting and block updates as blocks are being placed. I already tried making it so that block updates and lighting aren't ignored when pasting chunks, but that only made the game freeze and crash every time. You can fix lighting issues by quitting to title screen, going to the world select screen, selecting the world, clicking edit, and then optimize world (check `Erase cached data`). That should fix any weird lighting issues.
+
