@@ -106,7 +106,6 @@ public class CCUtils
 		//write data
 		writeChunkData_blocks(chunkBytes, chunk);
 		writeChunkData_blockEntities(chunkBytes, chunk);
-		writeChunkData_entities(chunkBytes, world, chunkPos);
 		
 		//return
 		chunkBytes.close();
