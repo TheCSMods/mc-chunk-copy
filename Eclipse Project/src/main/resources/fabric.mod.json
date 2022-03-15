@@ -13,15 +13,16 @@
 		"issues": "https://github.com/TheCSDev/mc-chunk-copy/issues"
 	},
 
-	"license": "GPL-3.0-or-later",
+	"license": "LGPL-3.0-or-later",
 	"icon": "assets/chunkcopy/icon.png",
 
-	"environment": "client",
+	"environment": "*",
 	"entrypoints":
 	{
-		"client": ["thecsdev.chunkcopy.ChunkCopy"]
+		"server": ["thecsdev.chunkcopy.server.ChunkCopyServer"],
+		"client": ["thecsdev.chunkcopy.client.ChunkCopyClient"]
 	},
-	"mixins": ["chunkcopy.mixins.json"],
+	"mixins": [],
 
 	"depends":
 	{

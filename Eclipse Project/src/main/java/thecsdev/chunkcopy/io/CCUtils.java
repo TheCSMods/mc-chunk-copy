@@ -1,25 +1,27 @@
 package thecsdev.chunkcopy.io;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.ArrayList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.BitSet;
 
 import org.apache.commons.io.FileUtils;
 
+import net.fabricmc.api.EnvType;
+import net.minecraft.block.BlockState;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.light.LightingProvider;
 
 import thecsdev.chunkcopy.ChunkCopy;
-import thecsdev.chunkcopy.ChunkNotLoadedException;
-import thecsdev.chunkcopy.Tuple;
 
 //RIFF chunk IDs:
 //0x01 - For blocks
@@ -28,10 +30,12 @@ import thecsdev.chunkcopy.Tuple;
 //
 //RIFF chunk format:
 //[VarInt id][VarInt data_length][byte[] data]
+
 /**
- * Provides utility methods for the {@link ChunkCopy} mod.
+ * Contains a set of methods that are used by both
+ * the client and the server version of the mod.
  */
-public final class CCUtils
+public class CCUtils
 {
 	// ==================================================
 	public static final String FILE_EXTENSION = ".bin";
@@ -50,34 +54,31 @@ public final class CCUtils
 	 * Returns a list of loaded chunks around the local player
 	 * in a specified world.
 	 * @param world The world where the chunks are located.
+	 * @param centerChunk The central point in the world.
 	 * @param chunkDistance Kind of like render distance, except it defines
 	 * how close the chunk has to be in order to be returned. Ranges from 0 to 8.
 	 * Higher values cause lots of lag.
 	 */
-	public static ArrayList<Tuple<World, ChunkPos>> getLoadedChunksInRange(World world, int chunkDistance)
+	public static ArrayList<Tuple<World, ChunkPos>> getLoadedChunksInRange(Tuple<World, ChunkPos> center, int chunkDistance)
 	{
+		World world = center.Item1;
+		ChunkPos chunkPos = center.Item2;
+		
 		//define the resulting list
 		ArrayList<Tuple<World, ChunkPos>> result = new ArrayList<>();
 		if(world == null) return result;
 		
 		//define stuff
-		MinecraftClient MC = ChunkCopy.MC;
-		int rndDist = (int)MC.worldRenderer.getViewDistance() / 2; //slice in half cuz we're using radius
-		int minDist = 0;
-		int maxDist = Math.min(rndDist, 8);
-		if(chunkDistance < minDist) chunkDistance = minDist;
-		else if(chunkDistance > maxDist) chunkDistance = maxDist;
-		
-		Chunk playerChunk = world.getWorldChunk(MC.player.getChunkPos().getBlockPos(0, 0, 0));
+		if(chunkDistance < 0) chunkDistance = 0;
+		else if(chunkDistance > 8) chunkDistance = 8;
 		
 		//add chunks
-		if(chunkDistance < 1) { /*nothing*/ }
-		else if(chunkDistance == 1) { result.add(new Tuple<World, ChunkPos>(world, playerChunk.getPos())); }
+		if(chunkDistance == 1) { result.add(new Tuple<World, ChunkPos>(world, chunkPos)); }
 		else if(chunkDistance > 1)
 		{
-			for(int chunkX = playerChunk.getPos().x - chunkDistance; chunkX < playerChunk.getPos().x + chunkDistance; chunkX++)
+			for(int chunkX = chunkPos.x - chunkDistance; chunkX < chunkPos.x + chunkDistance; chunkX++)
 			{
-				for(int chunkZ = playerChunk.getPos().z - chunkDistance; chunkZ < playerChunk.getPos().z + chunkDistance; chunkZ++)
+				for(int chunkZ = chunkPos.z - chunkDistance; chunkZ < chunkPos.z + chunkDistance; chunkZ++)
 				{
 					//check if loaded
 					if(!world.isChunkLoaded(chunkX, chunkZ)) continue;
@@ -94,15 +95,18 @@ public final class CCUtils
 	// ==================================================
 	/**
 	 * Copies all chunk data to a byte array.
+	 * @throws ChunkNotLoadedException 
 	 */
-	public static byte[] copyChunkData(Chunk chunk) throws IOException
+	public static byte[] copyChunkData(World world, ChunkPos chunkPos) throws IOException, ChunkNotLoadedException
 	{
 		//define
 		ByteArrayOutputStream chunkBytes = new ByteArrayOutputStream();
+		Chunk chunk = world.getChunk(chunkPos.getBlockPos(0, 0, 0));
 		
-		//write
+		//write data
 		writeChunkData_blocks(chunkBytes, chunk);
 		writeChunkData_blockEntities(chunkBytes, chunk);
+		writeChunkData_entities(chunkBytes, world, chunkPos);
 		
 		//return
 		chunkBytes.close();
@@ -137,6 +141,19 @@ public final class CCUtils
 		CCStreamUtils.writeVarInt(stream, blockBytes.length); //CHUNK SIZE
 		stream.write(blockBytes);                             //CHUNK DATA
 	}
+	// --------------------------------------------------
+	/** [VarInt id] [VarInt length] [byte[] entity_data] */
+	private static void writeChunkData_entities(OutputStream stream, World world, ChunkPos chunkPos)
+	throws IOException, ChunkNotLoadedException
+	{
+		//gather info
+		byte[] entityBytes = CCChunkUtils.chunkEntitiesToBytes(world, chunkPos);
+		
+		//write
+		stream.write(0x03);                                    //CHUNK ID
+		CCStreamUtils.writeVarInt(stream, entityBytes.length); //CHUNK SIZE
+		stream.write(entityBytes);                             //CHUNK DATA
+	}
 	// ==================================================
 	/**
 	 * Pastes all chunk data from a byte array to a chunk.
@@ -161,7 +178,17 @@ public final class CCUtils
 		//ChunkCopy.printChat("Reading chunk ID: " + riffChunkID  + ", remaining: " + stream.available());
 		if(riffChunkID == 0x01) readChunkDataBlock_blocks(world, chunkPos, stream);
 		else if(riffChunkID == 0x02) readChunkDataBlock_blockEntities(world, chunkPos, stream);
-		else throw new IOException("Unexpected byte: " + riffChunkID);
+		else readChunkDataBlock_skipBlock(stream);
+	}
+	// --------------------------------------------------
+	private static void readChunkDataBlock_skipBlock(InputStream stream) throws IOException
+	{
+		//get size (length)
+		int riffChunkLength = CCStreamUtils.readVarInt(stream);
+		if(riffChunkLength < 1) { return; }
+		
+		//skip bytes
+		stream.skipNBytes(riffChunkLength);
 	}
 	// --------------------------------------------------
 	private static void readChunkDataBlock_blocks(World world, ChunkPos chunkPos, InputStream stream)
@@ -208,38 +235,14 @@ public final class CCUtils
 	 * Higher values cause lots of lag.
 	 * @throws IOException 
 	 */
-	public static void saveLoadedChunksIO(String fileName, int chunkDistance) throws IOException
+	public static void saveLoadedChunksIO(String fileName, int chunkDistance, Tuple<World, ChunkPos> center) throws IOException
 	{
-		//define stuff
-		MinecraftClient MC = ChunkCopy.MC;
-		Chunk playerChunk = MC.world.getWorldChunk(MC.player.getChunkPos().getBlockPos(0, 0, 0));
-		
-		int rndDist = (int)MC.worldRenderer.getViewDistance() / 2; //slice in half cuz we're using radius
-		int minDist = 0;
-		int maxDist = Math.min(rndDist, 8);
-		if(chunkDistance < minDist) chunkDistance = minDist;
-		else if(chunkDistance > maxDist) chunkDistance = maxDist;
-		
 		//iterate and save chunks
-		if(chunkDistance > 1)
+		ArrayList<Tuple<World, ChunkPos>> chunks = getLoadedChunksInRange(center, chunkDistance);
+		for (Tuple<World, ChunkPos> chunk : chunks)
 		{
-			for(int chunkX = playerChunk.getPos().x - rndDist; chunkX < playerChunk.getPos().x + rndDist; chunkX++)
-			{
-				for(int chunkZ = playerChunk.getPos().z - rndDist; chunkZ < playerChunk.getPos().z + rndDist; chunkZ++)
-				{
-					//check if loaded
-					if(!MC.world.isChunkLoaded(chunkX, chunkZ)) continue;
-					
-					//copy chunk
-					saveLoadedChunkIO(MC.world, new ChunkPos(chunkX, chunkZ), fileName);
-				}
-			}
+			saveLoadedChunkIO(chunk, fileName);
 		}
-		else saveLoadedChunkIO(MC.world, playerChunk.getPos(), fileName);
-		
-		//feedback
-		ChunkCopy.printChat(new TranslatableText("thecsdev.chunkcopy.copiedchunks")
-				.getString().replace("{$fileName}", fileName));
 	}
 	//---------------------------------------------------
 	/**
@@ -250,14 +253,14 @@ public final class CCUtils
 	 * @throws IOException If this method fails to write chunk data to the save file
 	 * or if the chunk is currently unloaded.
 	 */
-	public static void saveLoadedChunkIO(World world, ChunkPos chunkPos, String fileName) throws IOException
+	public static boolean saveLoadedChunkIO(Tuple<World, ChunkPos> chunk, String fileName) throws IOException
 	{
+		World world = chunk.Item1;
+		ChunkPos chunkPos = chunk.Item2;
+		
 		//check if loaded
 		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
-			return;
-		
-		//get chunk
-		Chunk chunk = world.getChunk(chunkPos.getBlockPos(0, 0, 0));
+			return false;
 		
 		//get chunk file path
 		String worldIdNamespace = world.getRegistryKey().getValue().getNamespace();
@@ -269,8 +272,16 @@ public final class CCUtils
 		File chunkFile = new File(chunkFileStr);
 		
 		//copy chunk data to the file
-		chunkFile.getParentFile().mkdirs();
-		FileUtils.writeByteArrayToFile(chunkFile, CCStreamUtils.gzipCompressBytes(copyChunkData(chunk)));
+		try
+		{
+			chunkFile.getParentFile().mkdirs();
+			byte[] chunkBytes = CCStreamUtils.gzipCompressBytes(copyChunkData(world, chunkPos));
+			FileUtils.writeByteArrayToFile(chunkFile, chunkBytes);
+		}
+		catch (ChunkNotLoadedException e) { return false; }
+		
+		//return
+		return true;
 	}
 	// ==================================================
 	/**
@@ -280,38 +291,26 @@ public final class CCUtils
 	 * how close the chunk has to be in order to be loaded. Ranges from 0 to 8.
 	 * Higher values cause lots of lag.
 	 */
-	public static boolean loadLoadedChunksIO(String fileName, int chunkDistance) throws IOException
+	public static boolean loadLoadedChunksIO(String fileName, int chunkDistance, Tuple<World, ChunkPos> center) throws IOException
 	{
-		//check if singleplayer
-		MinecraftClient MC = ChunkCopy.MC;
-		if(!MC.isInSingleplayer())
-		{
-			ChunkCopy.printChatT("thecsdev.chunkcopy.requiresingleplayer");
-			return false;
-		}
-		
 		//check if the save file exists
-		else if(!new File(getSaveFileDirStr(fileName)).exists())
+		if(!new File(getSaveFileDirStr(fileName)).exists())
 		{
-			ChunkCopy.printChat(new TranslatableText("thecsdev.chunkcopy.pastefilenotfound")
+			thecsdev.chunkcopy.client.ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.pastefilenotfound")
 					.getString().replace("{$fileName}", fileName));
 			return false;
 		}
 		
 		//load chunks
-		World world = MC.getServer().getWorld(MC.world.getRegistryKey());
-		ArrayList<Tuple<World, ChunkPos>> chunks = getLoadedChunksInRange(world, chunkDistance);
+		ArrayList<Tuple<World, ChunkPos>> chunks = getLoadedChunksInRange(center, chunkDistance);
 		for (Tuple<World, ChunkPos> chunk : chunks)
 		{
-			loadLoadedChunkIO(fileName, chunk.Item1, chunk.Item2);
+			loadLoadedChunkIO(fileName, chunk);
 		}
 		
-		//feedback
-		ChunkCopy.printChat(new TranslatableText("thecsdev.chunkcopy.pastedchunks")
-				.getString().replace("{$fileName}", fileName));
-		
-		//reload renderer to avoid some blocks not being rendered
-		if(MC.worldRenderer != null) MC.worldRenderer.reload();
+		//reload renderer client-side to avoid some blocks not being rendered
+		refreshClientSide(center, chunkDistance);
+		refreshServerSide(center, chunkDistance);
 		
 		//return
 		return true;
@@ -323,15 +322,14 @@ public final class CCUtils
 	 * @param world The world in which the chunk is located.
 	 * @param chunkPos The position of the chunk in the world.
 	 */
-	public static boolean loadLoadedChunkIO(String fileName, World world, ChunkPos chunkPos) throws IOException
+	public static boolean loadLoadedChunkIO(String fileName, Tuple<World, ChunkPos> chunk) throws IOException
 	{
+		World world = chunk.Item1;
+		ChunkPos chunkPos = chunk.Item2;
+		
 		//check if loaded
 		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
 			return false;
-		
-		//check
-		MinecraftClient MC = ChunkCopy.MC;
-		if(!MC.isInSingleplayer()) { return false; }
 		
 		//get chunk file path
 		String worldIdNamespace = world.getRegistryKey().getValue().getNamespace();
@@ -350,9 +348,6 @@ public final class CCUtils
 		try { pasteChunkData(world, chunkPos, chunkBytes); }
 		catch (ChunkNotLoadedException e) { return false; }
 		
-		//send chunk data packet
-		CCChunkUtils.sendChunkDataS2CPacket(world, chunkPos);
-		
 		//return
 		return true;
 	}
@@ -364,30 +359,18 @@ public final class CCUtils
 	 * Higher values cause lots of lag.
 	 * @param state The block state to fill the chunks with.
 	 */
-	public static boolean fillLoadedChunks(int chunkDistance, BlockState state)
+	public static boolean fillLoadedChunks(int chunkDistance, BlockState state, Tuple<World, ChunkPos> center)
 	{
-		//check if singleplayer
-		MinecraftClient MC = ChunkCopy.MC;
-		if(!MC.isInSingleplayer())
-		{
-			ChunkCopy.printChatT("thecsdev.chunkcopy.requiresingleplayer");
-			return false;
-		}
-		
 		//clear chunks
-		World world = MC.getServer().getWorld(MC.world.getRegistryKey());
-		ArrayList<Tuple<World, ChunkPos>> chunks = getLoadedChunksInRange(world, chunkDistance);
+		ArrayList<Tuple<World, ChunkPos>> chunks = getLoadedChunksInRange(center, chunkDistance);
 		for (Tuple<World, ChunkPos> chunk : chunks)
 		{
 			fillLoadedChunk(chunk.Item1, chunk.Item2, state);
 		}
 		
-		//feedback
-		ChunkCopy.printChat(new TranslatableText("thecsdev.chunkcopy.filledchunks")
-				.getString().replace("{$blockName}", state.getBlock().getName().getString()));
-		
 		//reload renderer to avoid some blocks not being rendered
-		if(MC.worldRenderer != null) MC.worldRenderer.reload();
+		refreshClientSide(center, chunkDistance);
+		refreshServerSide(center, chunkDistance);
 		
 		//return
 		return true;
@@ -400,16 +383,60 @@ public final class CCUtils
 	 * @param state The block state to fill the chunk with.
 	 */
 	public static boolean fillLoadedChunk(World world, ChunkPos chunkPos, BlockState state)
-	{
+	{		
 		//clear
 		try { CCChunkUtils.fillChunkBlocks(world, chunkPos, state); }
 		catch (ChunkNotLoadedException e) { return false; }
 		
-		//send chunk data packet
-		CCChunkUtils.sendChunkDataS2CPacket(world, chunkPos);
-		
 		//return
 		return true;
+	}
+	// ==================================================
+	private static void refreshClientSide(Tuple<World, ChunkPos> center, int chunkDistance)
+	{
+		//--- I avoided importing client and server side packages just in case. ---
+		//check env.
+		if(ChunkCopy.getEnviroment() != EnvType.CLIENT) return;
+		net.minecraft.client.MinecraftClient MC = thecsdev.chunkcopy.client.ChunkCopyClient.getClient();
+		if(!MC.isInSingleplayer()) return;
+		
+		//iterate chunks
+		for(Tuple<World, ChunkPos> chunk : getLoadedChunksInRange(center, chunkDistance))
+		{
+			ChunkDataS2CPacket cd = makeMeAChunkDataPacketPls(chunk);
+			MC.getServer().getPlayerManager().sendToAll(cd);
+		}
+		
+		//reload renderer
+		if(MC.worldRenderer != null) MC.worldRenderer.reload();
+	}
+	// --------------------------------------------------
+	private static void refreshServerSide(Tuple<World, ChunkPos> center, int chunkDistance)
+	{
+		//--- I avoided importing client and server side packages just in case. ---
+		//check env.
+		if(ChunkCopy.getEnviroment() != EnvType.SERVER) return;
+		
+		//define stuff
+		net.minecraft.server.MinecraftServer srv = thecsdev.chunkcopy.server.ChunkCopyServer.getServer();
+		net.minecraft.server.world.ServerWorld srvW = srv.getWorld(center.Item1.getRegistryKey());
+		
+		//refresh players
+		for(Tuple<World, ChunkPos> chunk : getLoadedChunksInRange(center, chunkDistance))
+		{
+			ChunkDataS2CPacket chunkData = makeMeAChunkDataPacketPls(chunk);
+			srvW.getPlayers().forEach(p -> p.networkHandler.sendPacket(chunkData));
+		}
+	}
+	// --------------------------------------------------
+	//i didn't know what else to name this method so whatever
+	private static ChunkDataS2CPacket makeMeAChunkDataPacketPls(Tuple<World, ChunkPos> chunk)
+	{
+		WorldChunk wchunk = chunk.Item1.getChunk(chunk.Item2.x, chunk.Item2.z);
+		LightingProvider lp = chunk.Item1.getLightingProvider();
+		BitSet skyBits = new BitSet(0);
+		BitSet blockBits = new BitSet(0);
+		return new ChunkDataS2CPacket(wchunk, lp, skyBits, blockBits, true);
 	}
 	// ==================================================
 }

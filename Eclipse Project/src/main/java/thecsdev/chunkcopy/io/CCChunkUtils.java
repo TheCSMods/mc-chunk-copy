@@ -4,32 +4,42 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.BitSet;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.chunk.light.LightingProvider;
+
 import thecsdev.chunkcopy.ChunkCopy;
-import thecsdev.chunkcopy.ChunkNotLoadedException;
 
 /**
  * Provides utility methods related to chunk copying/pasting for the {@link ChunkCopy} mod.
  */
 public final class CCChunkUtils
 {
+	// ==================================================
+	/**
+	 * An array of entity types that will be targeted by
+	 * copying and pasting of chunks.
+	 */
+	public final static EntityType<?>[] EntityTypes =
+	{
+		EntityType.ARMOR_STAND, EntityType.ITEM_FRAME, EntityType.GLOW_ITEM_FRAME,
+		EntityType.MINECART, EntityType.HOPPER_MINECART, EntityType.FURNACE_MINECART,
+		EntityType.COMMAND_BLOCK_MINECART, EntityType.CHEST_MINECART, EntityType.TNT_MINECART,
+		EntityType.SPAWNER_MINECART
+	};
 	// ==================================================
 	/**
 	 * Iterates all block states in the chunk and adds their
@@ -108,6 +118,7 @@ public final class CCChunkUtils
 					
 					//get state, section, and local coords
 					BlockState state = Block.getStateFromRawId(blockID);
+					
 					ChunkSection toChunkSection = toChunk.getSection(toChunk.getSectionIndex(y));
 				    int localX = x, localY = y & 0xF, localZ = z;
 					toChunkSection.setBlockState(localX, localY, localZ, state);
@@ -217,7 +228,8 @@ public final class CCChunkUtils
 				catch (CommandSyntaxException e) { throw new IOException("Invalid or corrupt chunk NBT data."); }
 				
 				//apply
-				toChunk.setBlockEntity(BlockEntity.createFromNbt(blockPos, blockState, blockNbt));
+				if(!blockState.isAir()) //the check is done now so as to let the stream NBT data get handled
+					toChunk.setBlockEntity(BlockEntity.createFromNbt(blockPos, blockState, blockNbt));
 			}
 			
 			//close
@@ -226,6 +238,34 @@ public final class CCChunkUtils
 		
 		//close and end
 		chunkBytes.close();
+	}
+	// ==================================================
+	/** @throws NotImplementedException */
+	public static byte[] chunkEntitiesToBytes(World world, ChunkPos chunkPos)
+	throws IOException, ChunkNotLoadedException
+	{
+		throw new NotImplementedException();
+		/*//create stream
+		ByteArrayOutputStream chunkBytes = new ByteArrayOutputStream();
+		
+		//calculate and define stuff
+		Chunk chunk = world.getChunk(chunkPos.getBlockPos(0, 0, 0));
+		int chunkWidthX = Math.abs(chunkPos.getEndX() - chunkPos.getStartX());
+		int chunkWidthZ = Math.abs(chunkPos.getEndZ() - chunkPos.getStartZ());
+		Box chunkBox = new Box(
+				new BlockPos(0, chunk.getBottomY(), 0),
+				new BlockPos(chunkWidthX, chunk.getTopY(), chunkWidthZ));
+		
+		//iterate all entity types and write them down
+		for (EntityType<?> entityType : EntityTypes)
+		{
+			
+		}
+		
+		//return bytes
+		chunkBytes.close();
+		byte[] result = chunkBytes.toByteArray();
+		return result;*/
 	}
 	// ==================================================
 	/**
@@ -268,30 +308,6 @@ public final class CCChunkUtils
 		
 		//mark as should save
 		chunk.setShouldSave(true);
-	}
-	// ==================================================
-	/**
-	 * Refreshes a loaded chunk on the client side by sending a
-	 * {@link ChunkDataS2CPacket} letting the client know what
-	 * changes were made on that chunk.
-	 */
-	public static boolean sendChunkDataS2CPacket(World world, ChunkPos chunkPos)
-	{
-		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z)) return false;
-		MinecraftClient MC = MinecraftClient.getInstance();
-		
-		if(!world.isClient && MC.isInSingleplayer())
-		{
-			WorldChunk chunk = world.getChunk(chunkPos.x, chunkPos.z);
-			LightingProvider lp = world.getLightingProvider();
-			BitSet skyBits = new BitSet(0);
-			BitSet blockBits = new BitSet(0);
-			ChunkDataS2CPacket cd = new ChunkDataS2CPacket(chunk, lp, skyBits, blockBits, true);
-			
-			MC.getServer().getPlayerManager().sendToAll(cd);
-			return true;
-		}
-		else return false;
 	}
 	// ==================================================
 }

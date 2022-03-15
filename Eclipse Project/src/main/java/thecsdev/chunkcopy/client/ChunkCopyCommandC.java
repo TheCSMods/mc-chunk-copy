@@ -1,15 +1,21 @@
-package thecsdev.chunkcopy.commands;
+package thecsdev.chunkcopy.client;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
-import thecsdev.chunkcopy.ChunkCopy;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import thecsdev.chunkcopy.io.CCUtils;
+import thecsdev.chunkcopy.io.Tuple;
+import static thecsdev.chunkcopy.ChunkCopy.getExceptionMessage;
 
 import java.util.function.Predicate;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
@@ -19,13 +25,14 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
-public final class ChunkCopyCommand
+@Environment(EnvType.CLIENT)
+public final class ChunkCopyCommandC
 {
 	// ==================================================
 	public static int PERMISSION_LEVEL = 0;
 	
 	private final static Predicate<FabricClientCommandSource> SinglepOP =
-			src -> src.hasPermissionLevel(4) && ChunkCopy.MC.isInSingleplayer();
+			src -> src.hasPermissionLevel(4) && thecsdev.chunkcopy.client.ChunkCopyClient.Client.isInSingleplayer();
 	// ==================================================
 	public void register(CommandDispatcher<FabricClientCommandSource> dispatcher)
 	{
@@ -51,7 +58,7 @@ public final class ChunkCopyCommand
 	// ==================================================
 	private static int exec_copy_fn(CommandContext<FabricClientCommandSource> arg)
 	{
-		copy(arg.getArgument("fileName", String.class), (int) ChunkCopy.MC.worldRenderer.getViewDistance() / 2);
+		copy(arg.getArgument("fileName", String.class), (int) thecsdev.chunkcopy.client.ChunkCopyClient.Client.worldRenderer.getViewDistance() / 2);
 		return 1;
 	}
 	// --------------------------------------------------
@@ -63,7 +70,7 @@ public final class ChunkCopyCommand
 	// --------------------------------------------------
 	private static int exec_paste_fn(CommandContext<FabricClientCommandSource> arg)
 	{
-		paste(arg.getArgument("fileName", String.class), (int) ChunkCopy.MC.worldRenderer.getViewDistance() / 2);
+		paste(arg.getArgument("fileName", String.class), (int) thecsdev.chunkcopy.client.ChunkCopyClient.Client.worldRenderer.getViewDistance() / 2);
 		return 1;
 	}
 	// --------------------------------------------------
@@ -86,47 +93,70 @@ public final class ChunkCopyCommand
 		return 1;
 	}
 	// ==================================================
-	private static void copy(String fileName, int chunkDist)
+	public static void copy(String fileName, int chunkDist)
 	{
-		try { CCUtils.saveLoadedChunksIO(fileName, chunkDist); }
+		try
+		{
+			CCUtils.saveLoadedChunksIO(fileName, chunkDist, getClientChunk());
+			
+			//feedback
+			ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.copiedchunks")
+					.getString().replace("{$fileName}", fileName));
+		}
 		catch(Exception e) { handleException(e); }
 	}
 	// --------------------------------------------------
-	private static void paste(String fileName, int chunkDist)
+	public static void paste(String fileName, int chunkDist)
 	{
-		try { CCUtils.loadLoadedChunksIO(fileName, chunkDist); }
+		try
+		{
+			CCUtils.loadLoadedChunksIO(fileName, chunkDist, getClientChunk());
+			
+			//feedback
+			ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.pastedchunks")
+					.getString().replace("{$fileName}", fileName));
+		}
 		catch(Exception e) { handleException(e); }
 	}
 	// --------------------------------------------------
-	private static void clear(int chunkDist)
+	public static void clear(int chunkDist)
 	{
-		try { CCUtils.fillLoadedChunks(chunkDist, Blocks.AIR.getDefaultState()); }
+		try
+		{
+			BlockState state = Blocks.AIR.getDefaultState();
+			CCUtils.fillLoadedChunks(chunkDist, state, getClientChunk());
+			
+			//feedback
+			ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.filledchunks")
+					.getString().replace("{$blockName}", state.getBlock().getName().getString()));
+		}
 		catch(Exception e) { handleException(e); }
 	}
 	// --------------------------------------------------
-	private static void fill(int chunkDist, BlockState state)
+	public static void fill(int chunkDist, BlockState state)
 	{
-		try { CCUtils.fillLoadedChunks(chunkDist, state); }
+		try
+		{
+			CCUtils.fillLoadedChunks(chunkDist, state, getClientChunk());
+			
+			//feedback
+			ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.filledchunks")
+					.getString().replace("{$blockName}", state.getBlock().getName().getString()));
+		}
 		catch(Exception e) { handleException(e); }
 	}
 	// ==================================================
-	private static void handleException(Exception e)
+	private static Tuple<World, ChunkPos> getClientChunk()
 	{
-		String message = getExceptionMessage(e);
-		ChunkCopy.printChat(new TranslatableText("thecsdev.chunkcopy.exception")
-				.getString().replace("{$message}", "\n" + message + "\n"));
+		MinecraftClient MC = ChunkCopyClient.getClient();
+		return new Tuple<World, ChunkPos>(MC.world, MC.player.getChunkPos());
 	}
 	// --------------------------------------------------
-	private static String getExceptionMessage(Throwable e)
+	public static void handleException(Exception e)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(e.getClass().getCanonicalName() + ": " + e.getMessage() + "\n");
-		for (StackTraceElement ste : e.getStackTrace())
-		{
-			if(!ste.getClassName().contains("thecsdev")) continue;
-			sb.append(ste.toString() + "\n");
-		}
-		return sb.toString().trim();
+		String message = getExceptionMessage(e);
+		thecsdev.chunkcopy.client.ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.exception")
+				.getString().replace("{$message}", "\n" + message + "\n"));
 	}
 	// ==================================================
 }

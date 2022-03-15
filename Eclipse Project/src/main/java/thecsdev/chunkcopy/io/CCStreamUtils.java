@@ -9,7 +9,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Provides Stream and IO related utility methods for the {@link ChunkCopy} mod.
+ * Provides Stream and IO related utility methods for the {@link ChunkCopyClient} mod.
  */
 public final class CCStreamUtils
 {

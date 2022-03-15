@@ -1,4 +1,4 @@
-package thecsdev.chunkcopy;
+package thecsdev.chunkcopy.io;
 
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
