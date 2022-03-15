@@ -110,7 +110,7 @@ public final class ChunkCopyCommandC
 	{
 		try
 		{
-			CCUtils.loadLoadedChunksIO(fileName, chunkDist, getClientChunk());
+			CCUtils.loadLoadedChunksIO(fileName, chunkDist, getInternalServerChunk());
 			
 			//feedback
 			ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.pastedchunks")
@@ -124,7 +124,7 @@ public final class ChunkCopyCommandC
 		try
 		{
 			BlockState state = Blocks.AIR.getDefaultState();
-			CCUtils.fillLoadedChunks(chunkDist, state, getClientChunk());
+			CCUtils.fillLoadedChunks(chunkDist, state, getInternalServerChunk());
 			
 			//feedback
 			ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.filledchunks")
@@ -137,7 +137,7 @@ public final class ChunkCopyCommandC
 	{
 		try
 		{
-			CCUtils.fillLoadedChunks(chunkDist, state, getClientChunk());
+			CCUtils.fillLoadedChunks(chunkDist, state, getInternalServerChunk());
 			
 			//feedback
 			ChunkCopyClient.printChat(new TranslatableText("thecsdev.chunkcopy.filledchunks")
@@ -147,6 +147,12 @@ public final class ChunkCopyCommandC
 	}
 	// ==================================================
 	private static Tuple<World, ChunkPos> getClientChunk()
+	{
+		MinecraftClient MC = ChunkCopyClient.getClient();
+		return new Tuple<World, ChunkPos>(MC.world, MC.player.getChunkPos());
+	}
+	
+	private static Tuple<World, ChunkPos> getInternalServerChunk()
 	{
 		MinecraftClient MC = ChunkCopyClient.getClient();
 		return new Tuple<World, ChunkPos>(MC.getServer().getWorld(MC.world.getRegistryKey()), MC.player.getChunkPos());
