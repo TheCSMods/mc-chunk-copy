@@ -402,6 +402,7 @@ public class CCUtils
 		//iterate chunks
 		for(Tuple<World, ChunkPos> chunk : getLoadedChunksInRange(center, chunkDistance))
 		{
+			chunk.Item1.getWorldChunk(chunk.Item2.getBlockPos(0, 0, 0)).setShouldSave(true);
 			ChunkDataS2CPacket cd = makeMeAChunkDataPacketPls(chunk);
 			MC.getServer().getPlayerManager().sendToAll(cd);
 		}
@@ -423,6 +424,7 @@ public class CCUtils
 		//refresh players
 		for(Tuple<World, ChunkPos> chunk : getLoadedChunksInRange(center, chunkDistance))
 		{
+			chunk.Item1.getWorldChunk(chunk.Item2.getBlockPos(0, 0, 0)).setShouldSave(true);
 			ChunkDataS2CPacket chunkData = makeMeAChunkDataPacketPls(chunk);
 			srvW.getPlayers().forEach(p -> p.networkHandler.sendPacket(chunkData));
 		}

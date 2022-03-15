@@ -58,7 +58,7 @@ public final class ChunkCopyCommandC
 	// ==================================================
 	private static int exec_copy_fn(CommandContext<FabricClientCommandSource> arg)
 	{
-		copy(arg.getArgument("fileName", String.class), (int) thecsdev.chunkcopy.client.ChunkCopyClient.Client.worldRenderer.getViewDistance() / 2);
+		copy(arg.getArgument("fileName", String.class), (int) ChunkCopyClient.Client.worldRenderer.getViewDistance() / 2);
 		return 1;
 	}
 	// --------------------------------------------------
@@ -70,7 +70,7 @@ public final class ChunkCopyCommandC
 	// --------------------------------------------------
 	private static int exec_paste_fn(CommandContext<FabricClientCommandSource> arg)
 	{
-		paste(arg.getArgument("fileName", String.class), (int) thecsdev.chunkcopy.client.ChunkCopyClient.Client.worldRenderer.getViewDistance() / 2);
+		paste(arg.getArgument("fileName", String.class), (int) ChunkCopyClient.Client.worldRenderer.getViewDistance() / 2);
 		return 1;
 	}
 	// --------------------------------------------------
@@ -149,7 +149,7 @@ public final class ChunkCopyCommandC
 	private static Tuple<World, ChunkPos> getClientChunk()
 	{
 		MinecraftClient MC = ChunkCopyClient.getClient();
-		return new Tuple<World, ChunkPos>(MC.world, MC.player.getChunkPos());
+		return new Tuple<World, ChunkPos>(MC.getServer().getWorld(MC.world.getRegistryKey()), MC.player.getChunkPos());
 	}
 	// --------------------------------------------------
 	public static void handleException(Exception e)
