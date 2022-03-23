@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import net.fabricmc.api.EnvType;
 import thecsdev.chunkcopy.client.ChunkCopyClient;
-import thecsdev.chunkcopy.server.ChunkCopyServer;
 
 /**
  * The Fabric mod-loader entry point for this mod. 
@@ -24,9 +23,10 @@ public final class ChunkCopy
 	// ==================================================
 	public static File getModDirectory()
 	{
+		@SuppressWarnings("deprecation")
 		File runDir = getEnviroment() == EnvType.CLIENT ?
 				ChunkCopyClient.getClient().runDirectory :
-				ChunkCopyServer.getServer().getRunDirectory();
+					thecsdev.chunkcopy.server.ChunkCopyServer.getServer().getRunDirectory();
 		
 		return new File(runDir.getAbsolutePath() + "/mods/" + ModID + "/");				
 	}

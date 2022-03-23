@@ -26,7 +26,7 @@ import thecsdev.chunkcopy.ChunkCopy;
 //RIFF chunk IDs:
 //0x01 - For blocks
 //0x02 - For block entities
-//0x03 - For entities (too complicated to implement, i'm not gonna bother)
+//0x03 - For entities
 //
 //RIFF chunk format:
 //[VarInt id][VarInt data_length][byte[] data]
@@ -97,7 +97,8 @@ public class CCUtils
 	 * Copies all chunk data to a byte array.
 	 * @throws ChunkNotLoadedException 
 	 */
-	public static byte[] copyChunkData(World world, ChunkPos chunkPos) throws IOException, ChunkNotLoadedException
+	public static byte[] copyChunkData(World world, ChunkPos chunkPos)
+	throws IOException, ChunkNotLoadedException
 	{
 		//define
 		ByteArrayOutputStream chunkBytes = new ByteArrayOutputStream();
@@ -106,6 +107,7 @@ public class CCUtils
 		//write data
 		writeChunkData_blocks(chunkBytes, chunk);
 		writeChunkData_blockEntities(chunkBytes, chunk);
+		writeChunkData_entities(chunkBytes, world, chunkPos);
 		
 		//return
 		chunkBytes.close();
@@ -177,6 +179,7 @@ public class CCUtils
 		//ChunkCopy.printChat("Reading chunk ID: " + riffChunkID  + ", remaining: " + stream.available());
 		if(riffChunkID == 0x01) readChunkDataBlock_blocks(world, chunkPos, stream);
 		else if(riffChunkID == 0x02) readChunkDataBlock_blockEntities(world, chunkPos, stream);
+		else if(riffChunkID == 0x03) readChunkDataBlock_entities(world, chunkPos, stream);
 		else readChunkDataBlock_skipBlock(stream);
 	}
 	// --------------------------------------------------
@@ -225,6 +228,20 @@ public class CCUtils
 		//load bytes
 		CCChunkUtils.bytesToChunkEntityBlocks(chunkBytes, world, chunkPos);
 	}
+	// --------------------------------------------------
+	private static void readChunkDataBlock_entities(World world, ChunkPos chunkPos, InputStream stream)
+	throws IOException, ChunkNotLoadedException
+	{
+		//get size (length)
+		int riffChunkLength = CCStreamUtils.readVarInt(stream);
+		if(riffChunkLength < 1) { return; }
+		
+		//get bytes
+		byte[] chunkBytes = stream.readNBytes(riffChunkLength);
+		
+		//load bytes
+		CCChunkUtils.bytesToChunkEntities(chunkBytes, world, chunkPos);
+	}
 	// ==================================================
 	/**
 	 * Saves currently loaded chunks to a save file.
@@ -234,7 +251,8 @@ public class CCUtils
 	 * Higher values cause lots of lag.
 	 * @throws IOException 
 	 */
-	public static void saveLoadedChunksIO(String fileName, int chunkDistance, Tuple<World, ChunkPos> center) throws IOException
+	public static void saveLoadedChunksIO(String fileName, int chunkDistance, Tuple<World, ChunkPos> center)
+	throws IOException
 	{
 		//iterate and save chunks
 		ArrayList<Tuple<World, ChunkPos>> chunks = getLoadedChunksInRange(center, chunkDistance);
@@ -252,7 +270,8 @@ public class CCUtils
 	 * @throws IOException If this method fails to write chunk data to the save file
 	 * or if the chunk is currently unloaded.
 	 */
-	public static boolean saveLoadedChunkIO(Tuple<World, ChunkPos> chunk, String fileName) throws IOException
+	public static boolean saveLoadedChunkIO(Tuple<World, ChunkPos> chunk, String fileName)
+	throws IOException
 	{
 		World world = chunk.Item1;
 		ChunkPos chunkPos = chunk.Item2;
@@ -290,7 +309,9 @@ public class CCUtils
 	 * how close the chunk has to be in order to be loaded. Ranges from 0 to 8.
 	 * Higher values cause lots of lag.
 	 */
-	public static boolean loadLoadedChunksIO(String fileName, int chunkDistance, Tuple<World, ChunkPos> center) throws IOException
+	public static boolean loadLoadedChunksIO
+	(String fileName, int chunkDistance, Tuple<World, ChunkPos> center)
+	throws IOException
 	{
 		//check if the save file exists
 		if(!new File(getSaveFileDirStr(fileName)).exists())
@@ -321,7 +342,8 @@ public class CCUtils
 	 * @param world The world in which the chunk is located.
 	 * @param chunkPos The position of the chunk in the world.
 	 */
-	public static boolean loadLoadedChunkIO(String fileName, Tuple<World, ChunkPos> chunk) throws IOException
+	public static boolean loadLoadedChunkIO(String fileName, Tuple<World, ChunkPos> chunk)
+	throws IOException
 	{
 		World world = chunk.Item1;
 		ChunkPos chunkPos = chunk.Item2;
@@ -418,6 +440,7 @@ public class CCUtils
 		if(ChunkCopy.getEnviroment() != EnvType.SERVER) return;
 		
 		//define stuff
+		@SuppressWarnings("deprecation")
 		net.minecraft.server.MinecraftServer srv = thecsdev.chunkcopy.server.ChunkCopyServer.getServer();
 		net.minecraft.server.world.ServerWorld srvW = srv.getWorld(center.Item1.getRegistryKey());
 		

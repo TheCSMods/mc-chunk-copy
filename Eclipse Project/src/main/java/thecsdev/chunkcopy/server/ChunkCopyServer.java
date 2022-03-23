@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 import thecsdev.chunkcopy.ChunkCopy;
 
+@Deprecated
 @Environment(EnvType.SERVER)
 public class ChunkCopyServer implements DedicatedServerModInitializer
 {

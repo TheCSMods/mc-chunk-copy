@@ -5,17 +5,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -30,16 +30,21 @@ public final class CCChunkUtils
 {
 	// ==================================================
 	/**
-	 * An array of entity types that will be targeted by
-	 * copying and pasting of chunks.
+	 * Returns a global-space box containing the whole chunk.
 	 */
-	public final static EntityType<?>[] EntityTypes =
+	public static Box getChunkBoxGlobal(World world, ChunkPos chunkPos)
 	{
-		EntityType.ARMOR_STAND, EntityType.ITEM_FRAME, EntityType.GLOW_ITEM_FRAME,
-		EntityType.MINECART, EntityType.HOPPER_MINECART, EntityType.FURNACE_MINECART,
-		EntityType.COMMAND_BLOCK_MINECART, EntityType.CHEST_MINECART, EntityType.TNT_MINECART,
-		EntityType.SPAWNER_MINECART
-	};
+		//calculate
+		Chunk chunk = world.getChunk(chunkPos.getBlockPos(0, 0, 0));
+		int chunkWidthX = Math.abs(chunkPos.getEndX() - chunkPos.getStartX());
+		int chunkWidthZ = Math.abs(chunkPos.getEndZ() - chunkPos.getStartZ());
+		Box chunkBox = new Box(
+				chunkPos.getBlockPos(0, chunk.getBottomY(), 0),
+				chunkPos.getBlockPos(chunkWidthX, chunk.getTopY(), chunkWidthZ));
+		
+		//return
+		return chunkBox;
+	}
 	// ==================================================
 	/**
 	 * Iterates all block states in the chunk and adds their
@@ -240,32 +245,79 @@ public final class CCChunkUtils
 		chunkBytes.close();
 	}
 	// ==================================================
-	/** @throws NotImplementedException */
 	public static byte[] chunkEntitiesToBytes(World world, ChunkPos chunkPos)
 	throws IOException, ChunkNotLoadedException
 	{
-		throw new NotImplementedException();
-		/*//create stream
+		//create stream
 		ByteArrayOutputStream chunkBytes = new ByteArrayOutputStream();
 		
-		//calculate and define stuff
-		Chunk chunk = world.getChunk(chunkPos.getBlockPos(0, 0, 0));
-		int chunkWidthX = Math.abs(chunkPos.getEndX() - chunkPos.getStartX());
-		int chunkWidthZ = Math.abs(chunkPos.getEndZ() - chunkPos.getStartZ());
-		Box chunkBox = new Box(
-				new BlockPos(0, chunk.getBottomY(), 0),
-				new BlockPos(chunkWidthX, chunk.getTopY(), chunkWidthZ));
+		//get chunk box
+		Box chunkBox = getChunkBoxGlobal(world, chunkPos);
 		
 		//iterate all entity types and write them down
-		for (EntityType<?> entityType : EntityTypes)
+		for (EntityType<?> entityType : ChunkCopyEntities.getAllEntityTypes())
 		{
-			
+			for (Entity entity : world.getEntitiesByType(entityType, chunkBox, (arg) -> true))
+			{
+				//create a stream for each entity
+				ByteArrayOutputStream eBytes = new ByteArrayOutputStream();
+				
+				//write entity data to an NBT Compound
+				NbtCompound eNbt = new NbtCompound();
+				eNbt.putString("id", EntityType.getId(entityType).toString());
+				eNbt = entity.writeNbt(eNbt);
+				
+				//write the NBT data to the stream, and write the stream to chunk data
+				eBytes.write(NbtHelper.toNbtProviderString(eNbt).getBytes("UTF-8"));
+				CCStreamUtils.writeVarInt(chunkBytes, eBytes.size());
+				chunkBytes.write(eBytes.toByteArray());
+				eBytes.close();
+			}
 		}
 		
 		//return bytes
 		chunkBytes.close();
 		byte[] result = chunkBytes.toByteArray();
-		return result;*/
+		return result;
+	}
+	// --------------------------------------------------
+	public static void bytesToChunkEntities(byte[] bytes, World world, ChunkPos chunkPos)
+	throws IOException, ChunkNotLoadedException
+	{
+		//check if chunk loaded
+		if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
+			throw new ChunkNotLoadedException(world, chunkPos);
+		
+		//create stream and prepare
+		ByteArrayInputStream chunkBytes = new ByteArrayInputStream(bytes);
+		
+		//read entity blocks
+		while(chunkBytes.available() > 0)
+		{
+			//read entity block bytes
+			int eBytesLen = CCStreamUtils.readVarInt(chunkBytes);
+			ByteArrayInputStream entityBytes = new ByteArrayInputStream(chunkBytes.readNBytes(eBytesLen));
+			
+			//process entity bytes
+			try
+			{
+				//write entity data to an NBT Compound
+				NbtCompound eNbt = NbtHelper.fromNbtProviderString(new String(entityBytes.readAllBytes(), "UTF-8"));
+				
+				//spawn entity
+				try
+				{
+					//spawn entity
+					Entity entity = EntityType.getEntityFromNbt(eNbt, world).get();
+					world.spawnEntity(entity);
+				}
+				catch (Exception e) { /*eh, who cares if it fails ig...*/ }
+			}
+			catch (CommandSyntaxException e) { throw new IOException("Invalid or corrupt chunk NBT data."); }
+			
+			//close
+			entityBytes.close();
+		}
 	}
 	// ==================================================
 	/**
