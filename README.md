@@ -35,9 +35,6 @@ Here is a short YouTube clip showing how the mod works (click the image):<br/>
 #### Why can this mod not copy worldgen settings?
 * Because that too is handled server-side, and is therefore impossible to do. So the only way of obtaining the world seed would be to execute the `/seed` command, which may require operator permissions.
 
-#### Why can this mod not copy entities?
-* While it is possible to implement this feature, I did not feel like doing it. After all, mobs walk around all over the place, so how can you know which ones were where when pasting the same chunks multiple times, and which mobs to kill and replace.
-
 #### Where are the copied chunks stored?
 * In this directory: `[.minecraft]/mods/chunkcopy/`
 
