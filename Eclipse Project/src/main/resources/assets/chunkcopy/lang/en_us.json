@@ -1,8 +1,0 @@
-{
-	"thecsdev.chunkcopy.requiresingleplayer":"You need to be in singleplayer in order to do that.",
-	"thecsdev.chunkcopy.pastefilenotfound":"Unable to paste chunks from '{$fileName}', file not found.",
-	"thecsdev.chunkcopy.copiedchunks":"Copied chunk data to '{$fileName}'.",
-	"thecsdev.chunkcopy.pastedchunks":"Pasted chunk data from '{$fileName}'.",
-	"thecsdev.chunkcopy.filledchunks":"Filled chunk blocks with '{$blockName}'.",
-	"thecsdev.chunkcopy.exception":"An Exception was thrown during the operation: {$message}"
-}

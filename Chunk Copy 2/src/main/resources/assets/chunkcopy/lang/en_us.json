@@ -1,0 +1,8 @@
+{
+	"chunkcopy.feedback.copied": "[Chunk Copy] Copied chunk data to '%s'.",
+	"chunkcopy.feedback.pasted": "[Chunk Copy] Pasted chunk data from '%s'.",
+	"chunkcopy.feedback.filled": "[Chunk Copy] Filled chunk blocks with '%s'.",
+	"chunkcopy.feedback.require_singleplayer": "[Chunk Copy] You need to be in single-player in order to do this.",
+	"chunkcopy.feedback.paste_file_not_found": "[Chunk Copy] Unable to paste chunks from '%s', file not found.",
+	"chunkcopy.feedback.command_exception": "[Chunk Copy] An exception was thrown while executing the command: %s"
+}
