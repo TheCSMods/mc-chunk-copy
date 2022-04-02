@@ -26,23 +26,56 @@ public final class ChunkCopyAPI
 	public static final String FILE_EXTENSION = ".bin";
 	// ==================================================
 	/**
-	 * Returns the file path to a save file.
+	 * Returns the directory where all copied
+	 * chunk save files are stored.
+	 */
+	public static File getSaveFilesDirectory()
+	{
+		return new File(ChunkCopy.getModSavesDirectory().getAbsolutePath() + "/savedChunks/");
+	}
+	
+	/**
+	 * Returns the directory path to a save file.
 	 * @param fileName - The name of the save file.
 	 */
 	public static File getSaveFileDirectory(String fileName)
 	{
-		return new File(ChunkCopy.getModSavesDirectory().getAbsolutePath() +
-				"/savedChunks/" + fileName + "/");
+		fileName = fileName.replaceFirst("\\/.*", ""); //discard alternate pattern
+		return new File(getSaveFilesDirectory().getAbsolutePath() + "/" + fileName + "/");
 	}
 	// --------------------------------------------------
 	/**
 	 * Returns the save file for a specific world chunk.
+	 * @throws IOException For invalid fileName syntax.
+	 * @param world The world where the chunk is located.
+	 * @param chunkPos The {@link ChunkPos} of the chunk in the world.
+	 * @param fileName The directory where the chunk is or will be saved to.
 	 */
-	public static File getChunkSaveFile(World world, ChunkPos chunkPos, String fileName)
+	public static File getChunkSaveFile(World world, ChunkPos chunkPos, String fileName) throws IOException
 	{
 		//get world id
-		String worldIdNamespace = world.getRegistryKey().getValue().getNamespace();
-		String worldIdPath = world.getRegistryKey().getValue().getPath();
+		String worldIdNamespace = null;
+		String worldIdPath = null;
+		
+		//regex syntax check
+		IOException e = new IOException("Invalid fileName syntax.");
+		if(!fileName.matches("[a-zA-Z0-9_\\/]*")) throw e; //handle regular fileName
+		
+		if(fileName.contains("/")) //handle custom dimension definition
+		{
+			//regex check
+			if(!fileName.matches("[a-zA-Z0-9_]{1,}\\/[a-zA-Z0-9_]{1,}\\/[a-zA-Z0-9_]{1,}")) throw e;
+			
+			//split and assign values
+			String[] fnS = fileName.split("\\/");
+			worldIdNamespace = fnS[1];
+			worldIdPath = fnS[2];
+		}
+		else
+		{
+			worldIdNamespace = world.getRegistryKey().getValue().getNamespace();
+			worldIdPath = world.getRegistryKey().getValue().getPath();
+		}
 		
 		//construct path
 		String a = getSaveFileDirectory(fileName).getAbsolutePath() + "/";

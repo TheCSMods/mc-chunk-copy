@@ -4,7 +4,7 @@
 	"version": "${version}",
 
 	"name": "Chunk Copy",
-	"description": "A Minecraft mod that downloads worlds from multiplayer servers.",
+	"description": "A Minecraft mod that copies worlds from multiplayer servers.",
 	"authors": ["TheCSDev"],
 	"contact":
 	{

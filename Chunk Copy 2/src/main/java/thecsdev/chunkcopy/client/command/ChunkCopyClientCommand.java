@@ -20,19 +20,25 @@ public class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientCommand
 	public String getCommandName() { return "chunkcopy"; }
 	// --------------------------------------------------
 	@Override
-	protected boolean canCopy(FabricClientCommandSource commandSource) { return true; }
+	protected boolean canCopy(FabricClientCommandSource cs) { return true; }
 	// --------------------------------------------------
 	@Override
-	protected boolean canPaste(FabricClientCommandSource commandSource)
+	protected boolean canPaste(FabricClientCommandSource cs)
 	{
-		if(!commandSource.hasPermissionLevel(4))
-			return false;
-		else if(!net.minecraft.client.MinecraftClient.getInstance().isInSingleplayer())
-			return false;
-		else
-			return true;
+		if(!cs.hasPermissionLevel(4)) return false;
+		else if(!net.minecraft.client.MinecraftClient.getInstance().isInSingleplayer()) return false;
+		else return true;
 	}
+	// --------------------------------------------------
+	@Override
+	protected boolean canConfig(FabricClientCommandSource cs) { return true; }
 	// ==================================================
+	@Override
+	protected void execMain(FabricClientCommandSource cs)
+	{
+		cs.sendFeedback(new TranslatableText("chunkcopy.feedback.syntax.copypaste"));
+	}
+	// --------------------------------------------------
 	@Override
 	protected void copy(FabricClientCommandSource commandSource, String fileName, int chunkDistance)
 	{

@@ -3,17 +3,18 @@ package thecsdev.chunkcopy.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
+import net.fabricmc.api.EnvType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import thecsdev.chunkcopy.ChunkCopy;
+import thecsdev.chunkcopy.command.argument.CopiedChunksArgumentType;
 
 /**
  * The {@link ChunkCopy} command.
@@ -25,17 +26,18 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 	// ==================================================
 	public void register(CommandDispatcher<CS> dispatcher)
 	{
-		dispatcher.register(literal(getCommandName()).requires(src -> canCopy(src) || canPaste(src))
+		//register
+		dispatcher.register(literal(getCommandName()).executes(arg -> exec(arg))
 				//copying
 				.then(literal("copy").requires(arg -> canCopy(arg))
-						.then(argument("fileName", StringArgumentType.word())
+						.then(argument("fileName", CopiedChunksArgumentType.forCopying())
 								.executes(arg -> exec_copy_fileName(arg))
 								.then(argument("chunkDistance", ChunkDistArg)
 										.executes(arg -> exec_copy_fileName_chunkDistance(arg)))))
 				
 				//pasting
 				.then(literal("paste").requires(arg -> canPaste(arg))
-						.then(argument("fileName", StringArgumentType.word())
+						.then(argument("fileName", CopiedChunksArgumentType.forPasting())
 								.executes(arg -> exec_paste_fileName(arg))
 								.then(argument("chunkDistance", ChunkDistArg)
 										.executes(arg -> exec_paste_fileName_chunkDistance(arg)))))
@@ -50,9 +52,22 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 				.then(literal("clear").requires(arg -> canPaste(arg))
 						.then(argument("chunkDistance", ChunkDistArg)
 								.executes(arg -> exec_clear_chunkDistance(arg))))
+				
+				//config
+				/*.then(literal("settings").requires(arg -> canConfig(arg))
+						.then(argument("key", ConfigKeyArgumentType.configKeyId())
+								.then(argument("value", ConfigValueArgumentType.configStringValue())
+										.executes(arg -> exec_config_key_value(arg))
+										)))*/
 				);
 	}
 	// --------------------------------------------------
+	private int exec(CommandContext<CS> cs)
+	{
+		execMain(cs.getSource());
+		return 1;
+	}
+	// ---------------
 	private int exec_copy_fileName(CommandContext<CS> cs)
 	{
 		copy(cs.getSource(), cs.getArgument("fileName", String.class), 8);
@@ -83,13 +98,18 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 				cs.getArgument("blockState", BlockStateArgument.class).getBlockState());
 		return 1;
 	}
-	// ---------------
+	
 	private int exec_clear_chunkDistance(CommandContext<CS> cs)
 	{
 		fill(cs.getSource(), cs.getArgument("chunkDistance", Integer.class),
 				Blocks.AIR.getDefaultState());
 		return 1;
 	}
+	// ---------------
+	/*private int exec_config_key_value(CommandContext<CS> cs)
+	{
+		return 1;
+	}*/
 	// ==================================================
 	/**
 	 * The name of the command. <b>Must be constant!</b>
@@ -109,7 +129,25 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 	 * @param commandSource The command executor.
 	 */
 	protected abstract boolean canPaste(CS commandSource);
+	
+	/**
+	 * Returns true if a {@link CommandSource} can
+	 * access and modify the mod config.
+	 */
+	protected abstract boolean canConfig(CS commandSource);
 	// --------------------------------------------------
+	/**
+	 * Used to make a command syntax require a
+	 * specific {@link EnvType}.
+	 * @param env The required {@link EnvType}.
+	 */
+	protected final boolean requireEnv(EnvType env)
+	{
+		try { return ChunkCopy.getEnviroment() == env; }
+		catch (Exception e) { return false; }
+	}
+	// --------------------------------------------------
+	protected abstract void execMain(CS commandSource);
 	protected abstract void copy(CS commandSource, String fileName, int chunkDistance);
 	protected abstract void paste(CS commandSource, String fileName, int chunkDistance);
 	protected abstract void fill(CS commandSource, int chunkDistance, BlockState block);

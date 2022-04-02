@@ -10,13 +10,14 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 import thecsdev.chunkcopy.api.io.IOUtils;
 
-/**
+/**<b>Important: Please see {@link thecsdev.chunkcopy.api.data}!</b><br/>
+ * <br/>
  * A chunk data block contains certain information
  * about a world chunk.<br/>
- * 
+ * <br/>
  * <b>Every chunk data block type MUST have the {@link ChunkDataBlockID} attribute,
  * and must have a public constructor with no parameters.</b><br/>
- * 
+ * <br/>
  * Please see also {@link ChunkDataIO}.
  */
 public abstract class ChunkDataBlock implements ChunkDataIO

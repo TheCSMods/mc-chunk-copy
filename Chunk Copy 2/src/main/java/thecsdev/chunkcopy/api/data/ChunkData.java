@@ -79,11 +79,6 @@ public final class ChunkData implements ChunkDataIO
 		byte[] modIdBytes = ChunkCopy.ModID.getBytes("ASCII");
 		if(Arrays.compare(modIdBytes, stream.readNBytes(modIdBytes.length)) != 0)
 		{
-			/*throw new IOException("Unable to paste chunk data. If you are pasting data from an older "
-					+ "version of the mod, please use that version to paste the chunks. Attempts to "
-					+ "have v2.0 support older version save files were unfortunately unsuccessful.");*/
-			//no, im not giving up! i WILL write a backwards-compatible code
-			//that doesn't crash the game every time
 			stream.reset();
 			readData_legacy(stream);
 			return;

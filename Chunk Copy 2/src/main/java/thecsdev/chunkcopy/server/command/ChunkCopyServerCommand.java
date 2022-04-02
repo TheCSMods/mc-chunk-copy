@@ -18,11 +18,21 @@ public class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommandSource
 	public String getCommandName() { return "chunkcopysrv"; }
 	// --------------------------------------------------
 	@Override
-	protected boolean canCopy(ServerCommandSource commandSource) { return isOpAndHuman(commandSource); }
+	protected boolean canCopy(ServerCommandSource cs) { return isOpAndHuman(cs); }
 	// --------------------------------------------------
 	@Override
-	protected boolean canPaste(ServerCommandSource commandSource) { return isOpAndHuman(commandSource); }
+	protected boolean canPaste(ServerCommandSource cs) { return isOpAndHuman(cs); }
+	// --------------------------------------------------
+	@Override
+	protected boolean canConfig(ServerCommandSource cs) { return cs.hasPermissionLevel(4); }
 	// ==================================================
+	protected void execMain(ServerCommandSource cs)
+	{
+		String feedback  = "[Chunk Copy] Only operator players can execute this command so "
+				+ "that the mod can know where you wish to copy/paste chunks.";
+		cs.sendFeedback(new LiteralText(feedback), false);
+	}
+	// --------------------------------------------------
 	@Override
 	protected void copy(ServerCommandSource commandSource, String fileName, int chunkDistance)
 	{

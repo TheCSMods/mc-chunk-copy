@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.api.EnvType;
-import thecsdev.chunkcopy.api.ChunkCopyConfig;
+import thecsdev.chunkcopy.api.config.ChunkCopyConfig;
 import thecsdev.chunkcopy.api.data.ChunkData;
 import thecsdev.chunkcopy.api.data.block.CDBChunkSections;
 import thecsdev.chunkcopy.api.data.block.CDBEntitiesLegacy;
@@ -43,8 +43,9 @@ public abstract class ChunkCopy
 		//log stuff
 		LOGGER.info("Initializing '" + getModName() + "' as '" + getClass().getSimpleName() + "'.");
 		
-		//load config
-		ChunkCopyConfig.loadConfig();
+		//register config keys and load the config -- work in progress
+		ChunkCopyConfig.KEYS.add(ChunkCopyConfig.PASTE_ENTITIES);
+		//ChunkCopyConfig.loadConfig();
 		
 		//handle API registrations
 		ChunkData.registerChunkDataBlockType(CDBChunkSections.class);
