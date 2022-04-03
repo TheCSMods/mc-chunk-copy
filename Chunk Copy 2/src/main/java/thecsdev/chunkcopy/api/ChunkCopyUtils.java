@@ -3,6 +3,8 @@ package thecsdev.chunkcopy.api;
 import java.util.ArrayList;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -85,7 +87,11 @@ public final class ChunkCopyUtils
 		Box chunkBox = getChunkBox(world, chunkPos);
 		
 		//get and add entities
-		((WorldMixin)world).getEntityLookup().forEachIntersects(chunkBox, e -> result.add(e));
+		((WorldMixin)world).getEntityLookup().forEachIntersects(chunkBox, e ->
+		{
+			if(!(e instanceof PlayerEntity) && !(e instanceof EnderDragonEntity))
+				result.add(e);
+		});
 		
 		//return list
 		return result;

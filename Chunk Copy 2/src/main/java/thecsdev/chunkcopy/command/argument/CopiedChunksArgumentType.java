@@ -35,34 +35,39 @@ public final class CopiedChunksArgumentType implements ArgumentType<String>
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder)
 	{
-		//iterate existing directories and list them
-		File sfd = ChunkCopyAPI.getSaveFilesDirectory();
-		for (File dir : sfd.listFiles())
+		try
 		{
-			//skip files
-			if(!dir.isDirectory()) continue;
-			
-			//suggest directory
-			if(!showDimensions) builder.suggest(dir.getName());
-			else builder.suggest("\"" + dir.getName() + "\"");
-			
-			//suggest dimensions
-			if(showDimensions)
-				for(File subDir : dir.listFiles())
-				{
-					//skip files
-					if(!subDir.isDirectory()) continue;
-					
-					for(File subSubDir : subDir.listFiles())
+			//iterate existing directories and list them
+			File sfd = ChunkCopyAPI.getSaveFilesDirectory();
+			if(sfd.exists())
+			for (File dir : sfd.listFiles())
+			{
+				//skip files
+				if(!dir.isDirectory()) continue;
+				
+				//suggest directory
+				if(!showDimensions) builder.suggest(dir.getName());
+				else builder.suggest("\"" + dir.getName() + "\"");
+				
+				//suggest dimensions
+				if(showDimensions)
+					for(File subDir : dir.listFiles())
 					{
 						//skip files
-						if(!subSubDir.isDirectory()) continue;
+						if(!subDir.isDirectory()) continue;
 						
-						//suggest directory
-						builder.suggest("\"" + dir.getName() + "/" + subDir.getName() + "/" + subSubDir.getName() + "\"");
+						for(File subSubDir : subDir.listFiles())
+						{
+							//skip files
+							if(!subSubDir.isDirectory()) continue;
+							
+							//suggest directory
+							builder.suggest("\"" + dir.getName() + "/" + subDir.getName() + "/" + subSubDir.getName() + "\"");
+						}
 					}
-				}
+			}
 		}
+		catch (Exception e) {}
 		
 		//return
 		return builder.buildFuture();
