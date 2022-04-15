@@ -1,0 +1,13 @@
+{
+	"chunkcopy.title": "Chunk Copy",
+	
+	"chunkcopy.feedback.copied": "[Chunk Copy] Данные чанков скопированы в файл \"%s\".",
+	"chunkcopy.feedback.pasted": "[Chunk Copy] Данные чанков вставлены из файла \"%s\".",
+	"chunkcopy.feedback.filled": "[Chunk Copy] Чанки заполнены блоком \"%s".",
+	
+	"chunkcopy.feedback.require_singleplayer": "[Chunk Copy] Для выполнения операции необходимо находиться в одиночной игре.",
+	"chunkcopy.feedback.paste_file_not_found": "[Chunk Copy] Не удалось вставить данные чанков из файла \"%s\": файл не найден.",
+	"chunkcopy.feedback.command_exception": "[Chunk Copy] При выполнении команды произошла ошибка: %s",
+	
+	"chunkcopy.feedback.syntax.copypaste": "[Chunk Copy] Формат: /<команда> (copy/paste) <имя_файла> [радиус_в_чанках]"
+}
