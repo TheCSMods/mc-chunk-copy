@@ -12,6 +12,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.EmptyChunk;
+import net.minecraft.world.chunk.WorldChunk;
 import thecsdev.chunkcopy.ChunkCopy;
 import thecsdev.chunkcopy.api.data.ChunkData;
 import thecsdev.chunkcopy.api.data.block.CDBFillBlocks;
@@ -97,6 +99,10 @@ public final class ChunkCopyAPI
 	 */
 	public static void saveChunkDataIO(World world, ChunkPos chunkPos, String fileName) throws IOException
 	{
+		//make sure the chunk isn't null or empty
+		WorldChunk chunk = world.getChunk(chunkPos.x, chunkPos.z);
+		if(chunk == null || (chunk instanceof EmptyChunk)) return;
+		
 		//prepare the file
 		File file = getChunkSaveFile(world, chunkPos, fileName);
 		file.getParentFile().mkdirs();

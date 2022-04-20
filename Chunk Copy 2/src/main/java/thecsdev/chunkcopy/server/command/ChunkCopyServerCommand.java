@@ -11,7 +11,7 @@ import thecsdev.chunkcopy.api.ChunkCopyAPI;
 import thecsdev.chunkcopy.api.ChunkCopyUtils;
 import thecsdev.chunkcopy.command.ChunkCopyCommand;
 
-public class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommandSource>
+public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommandSource>
 {
 	// ==================================================
 	@Override
@@ -100,6 +100,17 @@ public class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommandSource
 			commandSource.sendFeedback(new LiteralText(feedback), true);
 		}
 		catch (Exception e) { handleException(commandSource, e); return; }
+	}
+	// --------------------------------------------------
+	@Override
+	protected void autoCopyStart(ServerCommandSource commandSource, String fileName) { autoCopyStop(commandSource); }
+	
+	@Override
+	protected void autoCopyStop(ServerCommandSource commandSource)
+	{
+		//send feedback
+		String feedback = "[Chunk Copy] Auto-copying is not available server-side.";
+		commandSource.sendFeedback(new LiteralText(feedback), false);
 	}
 	// ==================================================
 	private static boolean isOpAndHuman(ServerCommandSource src)

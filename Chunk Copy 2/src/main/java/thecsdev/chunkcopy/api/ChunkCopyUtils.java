@@ -9,6 +9,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.EmptyChunk;
+import net.minecraft.world.chunk.WorldChunk;
 import thecsdev.chunkcopy.mixin.WorldMixin;
 
 /**
@@ -45,6 +47,8 @@ public final class ChunkCopyUtils
 				{
 					//check if loaded
 					if(!world.isChunkLoaded(chunkX, chunkZ)) continue;
+					WorldChunk chunk = world.getChunk(chunkX, chunkZ);
+					if(chunk == null || (chunk instanceof EmptyChunk)) continue;
 					
 					//add chunk to the list
 					result.add(new ChunkPos(chunkX, chunkZ));

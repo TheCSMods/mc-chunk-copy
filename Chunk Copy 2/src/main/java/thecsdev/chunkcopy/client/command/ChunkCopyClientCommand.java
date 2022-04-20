@@ -9,11 +9,12 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.ChunkPos;
+import thecsdev.chunkcopy.api.AutoChunkCopy;
 import thecsdev.chunkcopy.api.ChunkCopyAPI;
 import thecsdev.chunkcopy.api.ChunkCopyUtils;
 import thecsdev.chunkcopy.command.ChunkCopyCommand;
 
-public class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientCommandSource>
+public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientCommandSource>
 {
 	// ==================================================
 	@Override
@@ -42,6 +43,11 @@ public class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientCommand
 	@Override
 	protected void copy(FabricClientCommandSource commandSource, String fileName, int chunkDistance)
 	{
+		copy(commandSource, fileName, chunkDistance, true);
+	}
+	
+	public void copy(FabricClientCommandSource commandSource, String fileName, int chunkDistance, boolean sendFeedback)
+	{
 		//obtain chunks
 		ClientWorld world = commandSource.getWorld();
 		ChunkPos chunkPos = commandSource.getPlayer().getChunkPos();
@@ -52,7 +58,10 @@ public class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientCommand
 		catch (Exception e) { handleException(commandSource, e); return; }
 		
 		//send feedback
-		commandSource.sendFeedback(new TranslatableText("chunkcopy.feedback.copied", fileName));
+		if(sendFeedback)
+		{
+			commandSource.sendFeedback(new TranslatableText("chunkcopy.feedback.copied", fileName));
+		}
 	}
 	// --------------------------------------------------
 	@Override
@@ -101,6 +110,25 @@ public class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientCommand
 		//send feedback
 		String bn = block.getBlock().getName().getString();
 		commandSource.sendFeedback(new TranslatableText("chunkcopy.feedback.filled", bn));
+	}
+	// --------------------------------------------------
+	@Override
+	protected void autoCopyStart(FabricClientCommandSource commandSource, String fileName)
+	{
+		copy(commandSource, fileName, 8, false);
+		AutoChunkCopy.start(fileName);
+		
+		//send feedback
+		commandSource.sendFeedback(new TranslatableText("chunkcopy.feedback.autocopy_start", fileName));
+	}
+	
+	@Override
+	protected void autoCopyStop(FabricClientCommandSource commandSource)
+	{
+		AutoChunkCopy.stop();
+		
+		//send feedback
+		commandSource.sendFeedback(new TranslatableText("chunkcopy.feedback.autocopy_stop"));
 	}
 	// ==================================================
 	/**

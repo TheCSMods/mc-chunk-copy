@@ -100,6 +100,18 @@ public abstract class ChunkCopy
 	 * is currently running.
 	 */
 	public static File getRunDirectory() { return new File(System.getProperty("user.dir")); }
+	// --------------------------------------------------
+	/**
+	 * Returns true if {@link #getEnviroment()} returns {@link EnvType#CLIENT}.
+	 * @throws RuntimeException See {@link #getEnviroment()}.
+	 */
+	public static boolean isServer() { return getEnviroment() == EnvType.SERVER; }
+	
+	/**
+	 * Returns true if {@link #getEnviroment()} returns {@link EnvType#SERVER}.
+	 * @throws RuntimeException See {@link #getEnviroment()}.
+	 */
+	public static boolean isClient() { return getEnviroment() == EnvType.CLIENT; }
 	// ==================================================
 	/**
 	 * Returns the registered {@link ChunkCopyCommand}.

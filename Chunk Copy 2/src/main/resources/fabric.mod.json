@@ -22,7 +22,7 @@
 		"client": ["thecsdev.chunkcopy.client.ChunkCopyClient"],
 		"server": ["thecsdev.chunkcopy.server.ChunkCopyServer"]
 	},
-	"mixins": ["chunkcopy.mixins.json"],
+	"mixins": ["chunkcopy.mixins.json", "chunkcopy.client.mixins.json"],
 
 	"depends":
 	{
