@@ -86,10 +86,10 @@ public final class ChunkData implements ChunkDataIO
 		
 		//read file version
 		int fileVersion = IOUtils.readVarInt(stream);
-		if(fileVersion > ChunkCopy.FileVersion)
+		if(fileVersion != ChunkCopy.FileVersion)
 		{
-			throw new IOException("Unable to read and paste chunk data because it was saved using an "
-					+ "incompatible file or game version. Please use that version to paste chunk data.");
+			throw new IOException("Unable to read and paste chunk data because it was saved using a "
+					+ "different file or game version. Please use that version to paste the chunk data.");
 		}
 		
 		//read chunk data blocks

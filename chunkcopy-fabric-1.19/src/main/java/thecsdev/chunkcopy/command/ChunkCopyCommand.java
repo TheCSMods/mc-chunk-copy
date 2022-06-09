@@ -29,7 +29,7 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 	public void register(CommandDispatcher<CS> dispatcher, CommandRegistryAccess cra)
 	{
 		//register
-		dispatcher.register(literal(getCommandName()).executes(arg -> exec(arg))
+		dispatcher.register(literal(getCommandName()).requires(cs -> canChunkCopy(cs)).executes(arg -> exec(arg))
 				//copying
 				.then(literal("copy").requires(arg -> canCopy(arg))
 						.then(argument("fileName", CopiedChunksArgumentType.forCopying())
@@ -139,6 +139,13 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 	 */
 	public abstract String getCommandName();
 	// --------------------------------------------------
+	/**
+	 * Returns true if a {@link CommandSource} can
+	 * execute any chunk copy commands.
+	 * @param commandSource The command executor.
+	 */
+	protected abstract boolean canChunkCopy(CS commandSource);
+	
 	/**
 	 * Returns true if a {@link CommandSource} can
 	 * execute copying commands.

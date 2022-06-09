@@ -21,6 +21,9 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 	public String getCommandName() { return "chunkcopy"; }
 	// --------------------------------------------------
 	@Override
+	protected boolean canChunkCopy(FabricClientCommandSource cs) { return true; }
+	// --------------------------------------------------
+	@Override
 	protected boolean canCopy(FabricClientCommandSource cs) { return true; }
 	// --------------------------------------------------
 	@Override

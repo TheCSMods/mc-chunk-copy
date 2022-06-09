@@ -19,8 +19,11 @@ import thecsdev.chunkcopy.api.ChunkCopyAPI;
 public final class CopiedChunksArgumentType implements ArgumentType<String>
 {
 	// ==================================================
-	public static CopiedChunksArgumentType forCopying() { return new CopiedChunksArgumentType(false); }
-	public static CopiedChunksArgumentType forPasting() { return new CopiedChunksArgumentType(true); }
+	public final static CopiedChunksArgumentType forCopying = new CopiedChunksArgumentType(false);
+	public final static CopiedChunksArgumentType forPasting = new CopiedChunksArgumentType(true);
+	// --------------------------------------------------
+	public static CopiedChunksArgumentType forCopying() { return forCopying; }
+	public static CopiedChunksArgumentType forPasting() { return forPasting; }
 	// ==================================================
 	public final boolean showDimensions;
 	protected CopiedChunksArgumentType(boolean showDimensions) { this.showDimensions = showDimensions; }

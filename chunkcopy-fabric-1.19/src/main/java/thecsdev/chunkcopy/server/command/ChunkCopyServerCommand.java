@@ -18,6 +18,9 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 	public String getCommandName() { return "chunkcopysrv"; }
 	// --------------------------------------------------
 	@Override
+	protected boolean canChunkCopy(ServerCommandSource cs) { return cs.hasPermissionLevel(4); }
+	// --------------------------------------------------
+	@Override
 	protected boolean canCopy(ServerCommandSource cs) { return isOpAndHuman(cs); }
 	// --------------------------------------------------
 	@Override
