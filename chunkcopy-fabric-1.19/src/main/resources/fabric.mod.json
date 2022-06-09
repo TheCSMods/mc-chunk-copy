@@ -20,7 +20,7 @@
 	"entrypoints":
 	{
 		"client": ["thecsdev.chunkcopy.client.ChunkCopyClient"],
-		"server": ["thecsdev.chunkcopy.server.ChunkCopyServer"]
+		"server": []
 	},
 	"mixins": ["chunkcopy.mixins.json", "chunkcopy.client.mixins.json"],
 

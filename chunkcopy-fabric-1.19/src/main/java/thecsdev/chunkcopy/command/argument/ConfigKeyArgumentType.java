@@ -18,6 +18,7 @@ import thecsdev.chunkcopy.api.config.ConfigKey;
  * An {@link ArgumentType}&lt;{@link Identifier}&gt; that will suggest picking
  * a property from a list of {@link ChunkCopyConfig#KEYS}.
  */
+@Deprecated
 public final class ConfigKeyArgumentType implements ArgumentType<Identifier>
 {
 	// ==================================================

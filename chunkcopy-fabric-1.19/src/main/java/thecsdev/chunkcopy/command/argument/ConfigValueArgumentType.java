@@ -17,6 +17,7 @@ import thecsdev.chunkcopy.api.config.ConfigKey;
  * An {@link ArgumentType}&lt;{@link String}&gt; that will suggest picking
  * appropriate values for {@link ConfigKeyArgumentType}.
  */
+@Deprecated
 public final class ConfigValueArgumentType implements ArgumentType<String>
 {
 	// ==================================================
