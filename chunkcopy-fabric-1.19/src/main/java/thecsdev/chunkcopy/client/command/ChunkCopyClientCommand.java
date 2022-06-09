@@ -7,7 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
 import thecsdev.chunkcopy.api.AutoChunkCopy;
 import thecsdev.chunkcopy.api.ChunkCopyAPI;
@@ -37,7 +37,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 	@Override
 	protected void execMain(FabricClientCommandSource cs)
 	{
-		cs.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.syntax.copypaste"));
+		cs.sendFeedback(Text.translatable("chunkcopy.feedback.syntax.copypaste"));
 	}
 	// --------------------------------------------------
 	@Override
@@ -60,7 +60,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		//send feedback
 		if(sendFeedback)
 		{
-			commandSource.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.copied", fileName));
+			commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.copied", fileName));
 		}
 	}
 	// --------------------------------------------------
@@ -74,7 +74,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		//check if file exists
 		if(!ChunkCopyAPI.getSaveFileDirectory(fileName).exists())
 		{
-			commandSource.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.paste_file_not_found",
+			commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.paste_file_not_found",
 					new Object[] { fileName }));
 			return;
 		}
@@ -89,7 +89,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		catch (Exception e) { handleException(commandSource, e); return; }
 		
 		//send feedback
-		commandSource.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.pasted", fileName));
+		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.pasted", fileName));
 	}
 	// --------------------------------------------------
 	@Override
@@ -109,7 +109,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		
 		//send feedback
 		String bn = block.getBlock().getName().getString();
-		commandSource.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.filled", bn));
+		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.filled", bn));
 	}
 	// --------------------------------------------------
 	@Override
@@ -119,7 +119,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		AutoChunkCopy.start(fileName);
 		
 		//send feedback
-		commandSource.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.autocopy_start", fileName));
+		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.autocopy_start", fileName));
 	}
 	
 	@Override
@@ -128,7 +128,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		AutoChunkCopy.stop();
 		
 		//send feedback
-		commandSource.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.autocopy_stop"));
+		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.autocopy_stop"));
 	}
 	// ==================================================
 	/**
@@ -141,7 +141,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		MinecraftClient mc = MinecraftClient.getInstance();
 		if(!mc.isInSingleplayer())
 		{
-			cmdSrc.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.require_singleplayer"));
+			cmdSrc.sendFeedback(Text.translatable("chunkcopy.feedback.require_singleplayer"));
 			return false;
 		}
 		return true;
@@ -152,7 +152,7 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 	 */
 	private void handleException(FabricClientCommandSource source, Exception e)
 	{
-		source.sendFeedback(new TranslatableTextContent("chunkcopy.feedback.command_exception",
+		source.sendFeedback(Text.translatable("chunkcopy.feedback.command_exception",
 				new Object[] { "\n" + getExceptionMessage(e) }));
 	}
 	// ==================================================

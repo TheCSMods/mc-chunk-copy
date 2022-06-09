@@ -3,7 +3,7 @@ package thecsdev.chunkcopy.server;
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import thecsdev.chunkcopy.ChunkCopy;
 import thecsdev.chunkcopy.command.ChunkCopyCommand;
 import thecsdev.chunkcopy.server.command.ChunkCopyServerCommand;
@@ -23,10 +23,10 @@ public final class ChunkCopyServer extends ChunkCopy implements DedicatedServerM
 	public void onInitializeServer()
 	{
 		//register the command
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) ->
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, enviroment) ->
 		{
 			Command = new ChunkCopyServerCommand();
-			Command.register(dispatcher);
+			Command.register(dispatcher, registryAccess);
 		});
 	}
 	// --------------------------------------------------

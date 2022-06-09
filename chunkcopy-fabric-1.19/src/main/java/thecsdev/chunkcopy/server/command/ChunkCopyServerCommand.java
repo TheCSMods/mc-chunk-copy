@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
 import thecsdev.chunkcopy.api.ChunkCopyAPI;
 import thecsdev.chunkcopy.api.ChunkCopyUtils;
@@ -30,7 +30,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 	{
 		String feedback  = "[Chunk Copy] Only operator players can execute this command so "
 				+ "that the mod can know where you wish to copy/paste chunks.";
-		cs.sendFeedback(new LiteralText(feedback), false);
+		cs.sendFeedback(Text.literal(feedback), false);
 	}
 	// --------------------------------------------------
 	@Override
@@ -48,7 +48,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 			
 			//send feedback
 			String feedback = String.format("[Chunk Copy] Copied chunk data to '%s'.", fileName);
-			commandSource.sendFeedback(new LiteralText(feedback), true);
+			commandSource.sendFeedback(Text.literal(feedback), true);
 		}
 		catch (Exception e) { handleException(commandSource, e); return; }
 	}
@@ -60,7 +60,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 		if(!ChunkCopyAPI.getSaveFileDirectory(fileName).exists())
 		{
 			String feedback = String.format("[Chunk Copy] Unable to paste chunks from '%s', file not found.", fileName);
-			commandSource.sendFeedback(new LiteralText(feedback), true);
+			commandSource.sendFeedback(Text.literal(feedback), true);
 			return;
 		}
 		
@@ -76,7 +76,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 			
 			//send feedback
 			String feedback = String.format("[Chunk Copy] Pasted chunk data from '%s'.", fileName);
-			commandSource.sendFeedback(new LiteralText(feedback), true);
+			commandSource.sendFeedback(Text.literal(feedback), true);
 		}
 		catch (Exception e) { handleException(commandSource, e); return; }
 	}
@@ -97,7 +97,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 			//send feedback
 			String bn = block.getBlock().getName().getString();
 			String feedback = String.format("[Chunk Copy] Filled chunk blocks with '%s'.", bn);
-			commandSource.sendFeedback(new LiteralText(feedback), true);
+			commandSource.sendFeedback(Text.literal(feedback), true);
 		}
 		catch (Exception e) { handleException(commandSource, e); return; }
 	}
@@ -110,7 +110,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 	{
 		//send feedback
 		String feedback = "[Chunk Copy] Auto-copying is not available server-side.";
-		commandSource.sendFeedback(new LiteralText(feedback), false);
+		commandSource.sendFeedback(Text.literal(feedback), false);
 	}
 	// ==================================================
 	private static boolean isOpAndHuman(ServerCommandSource src)
@@ -127,7 +127,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 		String feedback = String.format(
 				"[Chunk Copy] An exception was thrown while executing the command: %s",
 				"\n" + getExceptionMessage(e));
-		source.sendFeedback(new LiteralText(feedback), true);
+		source.sendFeedback(Text.literal(feedback), true);
 	}
 	// ==================================================
 }

@@ -24,7 +24,7 @@ public final class ChunkCopyClient extends ChunkCopy implements ClientModInitial
 	{
 		//register the command
 		Command = new ChunkCopyClientCommand();
-		Command.register(ClientCommandManager.getActiveDispatcher());
+		Command.register(ClientCommandManager.getActiveDispatcher(), /*missing required CommandRegistryAccess*/);
 	}
 	// --------------------------------------------------
 	@Override
