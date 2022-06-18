@@ -57,13 +57,21 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		ArrayList<ChunkPos> loadedChunks = ChunkCopyUtils.getNearbyLoadedChunks(world, chunkPos, chunkDistance);
 		
 		//copy chunks
-		try { for (ChunkPos cp : loadedChunks) ChunkCopyAPI.saveChunkDataIO(world, cp, fileName); }
+		int affectedChunks = 0;
+		try
+		{
+			for (ChunkPos cp : loadedChunks)
+			{
+				ChunkCopyAPI.saveChunkDataIO(world, cp, fileName);
+				affectedChunks++;
+			}
+		}
 		catch (Exception e) { handleException(commandSource, e); return; }
 		
 		//send feedback
 		if(sendFeedback)
 		{
-			commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.copied", fileName));
+			commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.copied", affectedChunks, fileName));
 		}
 	}
 	// --------------------------------------------------
@@ -88,11 +96,19 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		ArrayList<ChunkPos> loadedChunks = ChunkCopyUtils.getNearbyLoadedChunks(world, chunkPos, chunkDistance);
 		
 		//paste chunks
-		try { for (ChunkPos cp : loadedChunks) ChunkCopyAPI.loadChunkDataIO(world, cp, fileName); }
+		int affectedChunks = 0;
+		try
+		{
+			for (ChunkPos cp : loadedChunks)
+			{
+				if(ChunkCopyAPI.loadChunkDataIO(world, cp, fileName))
+					affectedChunks++;
+			}
+		}
 		catch (Exception e) { handleException(commandSource, e); return; }
 		
 		//send feedback
-		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.pasted", fileName));
+		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.pasted", affectedChunks, fileName));
 	}
 	// --------------------------------------------------
 	@Override
@@ -107,12 +123,20 @@ public final class ChunkCopyClientCommand extends ChunkCopyCommand<FabricClientC
 		ArrayList<ChunkPos> loadedChunks = ChunkCopyUtils.getNearbyLoadedChunks(world, chunkPos, chunkDistance);
 		
 		//fill chunks
-		try { for (ChunkPos cp : loadedChunks) ChunkCopyAPI.fillChunkBlocks(world, cp, block); }
+		int affectedChunks = 0;
+		try
+		{
+			for (ChunkPos cp : loadedChunks)
+			{
+				ChunkCopyAPI.fillChunkBlocks(world, cp, block);
+				affectedChunks++;
+			}
+		}
 		catch (Exception e) { handleException(commandSource, e); return; }
 		
 		//send feedback
 		String bn = block.getBlock().getName().getString();
-		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.filled", bn));
+		commandSource.sendFeedback(Text.translatable("chunkcopy.feedback.filled", affectedChunks, bn));
 	}
 	// --------------------------------------------------
 	@Override

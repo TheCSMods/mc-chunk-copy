@@ -47,10 +47,15 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 			ArrayList<ChunkPos> loadedChunks = ChunkCopyUtils.getNearbyLoadedChunks(world, chunkPos, chunkDistance);
 			
 			//copy chunks
-			for (ChunkPos cp : loadedChunks) ChunkCopyAPI.saveChunkDataIO(world, cp, fileName);
+			int affectedChunks = 0;
+			for (ChunkPos cp : loadedChunks)
+			{
+				ChunkCopyAPI.saveChunkDataIO(world, cp, fileName);
+				affectedChunks++;
+			}
 			
 			//send feedback
-			String feedback = String.format("[Chunk Copy] Copied chunk data to '%s'.", fileName);
+			String feedback = String.format("[Chunk Copy] Copied %d chunks to '%s'.", affectedChunks, fileName);
 			commandSource.sendFeedback(Text.literal(feedback), true);
 		}
 		catch (Exception e) { handleException(commandSource, e); return; }
@@ -75,10 +80,15 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 			ArrayList<ChunkPos> loadedChunks = ChunkCopyUtils.getNearbyLoadedChunks(world, chunkPos, chunkDistance);
 			
 			//paste chunks
-			for (ChunkPos cp : loadedChunks) ChunkCopyAPI.loadChunkDataIO(world, cp, fileName);
+			int affectedChunks = 0;
+			for (ChunkPos cp : loadedChunks)
+			{
+				if(ChunkCopyAPI.loadChunkDataIO(world, cp, fileName))
+					affectedChunks++;
+			}
 			
 			//send feedback
-			String feedback = String.format("[Chunk Copy] Pasted chunk data from '%s'.", fileName);
+			String feedback = String.format("[Chunk Copy] Pasted %d chunks from '%s'.", affectedChunks, fileName);
 			commandSource.sendFeedback(Text.literal(feedback), true);
 		}
 		catch (Exception e) { handleException(commandSource, e); return; }
@@ -95,11 +105,16 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 			ArrayList<ChunkPos> loadedChunks = ChunkCopyUtils.getNearbyLoadedChunks(world, chunkPos, chunkDistance);
 			
 			//fill chunks
-			for (ChunkPos cp : loadedChunks) ChunkCopyAPI.fillChunkBlocks(world, cp, block);
+			int affectedChunks = 0;
+			for (ChunkPos cp : loadedChunks)
+			{
+				ChunkCopyAPI.fillChunkBlocks(world, cp, block);
+				affectedChunks++;
+			}
 			
 			//send feedback
 			String bn = block.getBlock().getName().getString();
-			String feedback = String.format("[Chunk Copy] Filled chunk blocks with '%s'.", bn);
+			String feedback = String.format("[Chunk Copy] Filled %d chunks with '%s'.", affectedChunks, bn);
 			commandSource.sendFeedback(Text.literal(feedback), true);
 		}
 		catch (Exception e) { handleException(commandSource, e); return; }
