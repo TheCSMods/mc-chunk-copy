@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
@@ -24,7 +25,7 @@ import thecsdev.chunkcopy.api.io.IOUtils;
 public class CDBFillBlocks extends ChunkDataBlock
 {
 	// ==================================================
-	public int BlockID = 0;
+	public BlockState state = Blocks.AIR.getDefaultState();
 	// ==================================================
 	@Override
 	public void copyData(World world, ChunkPos chunkPos) {}
@@ -38,7 +39,6 @@ public class CDBFillBlocks extends ChunkDataBlock
 		
 		//iterate all block IDs
 		int x = 0, y = chunk.getBottomY(), z = 0;
-		BlockState state = Blocks.AIR.getDefaultState();
 		
 		while (y < chunk.getTopY() + 1)
 		{
@@ -73,13 +73,13 @@ public class CDBFillBlocks extends ChunkDataBlock
 	@Override
 	public void readData(InputStream stream) throws IOException
 	{
-		BlockID = IOUtils.readVarInt(stream);
+		state = Block.getStateFromRawId(IOUtils.readVarInt(stream));
 	}
 	// --------------------------------------------------
 	@Override
 	public void writeData(OutputStream stream) throws IOException
 	{
-		IOUtils.writeVarInt(stream, BlockID);
+		IOUtils.writeVarInt(stream, Block.getRawIdFromState(state));
 	}
 	// ==================================================
 }

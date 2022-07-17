@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
@@ -177,7 +176,7 @@ public final class ChunkCopyAPI
 	public static void fillChunkBlocks(ServerWorld world, ChunkPos chunkPos, BlockState block)
 	{
 		CDBFillBlocks f = new CDBFillBlocks();
-		f.BlockID = Block.getRawIdFromState(block);
+		f.state = block;
 		f.pasteData(world, chunkPos);
 		f.updateClients(world, chunkPos);
 	}
