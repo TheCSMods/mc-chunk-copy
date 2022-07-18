@@ -112,6 +112,12 @@ public abstract class ChunkCopy
 	 * @throws RuntimeException See {@link #getEnviroment()}.
 	 */
 	public static boolean isClient() { return getEnviroment() == EnvType.CLIENT; }
+	
+	/**
+	 * Returns true if {@link #isClient()} and if client is in single player.
+	 * @throws RuntimeException See {@link #getEnviroment()}.
+	 */
+	public static boolean isInSinglePlayer() { return isClient() && net.minecraft.client.MinecraftClient.getInstance().isInSingleplayer(); }
 	// ==================================================
 	/**
 	 * Returns the registered {@link ChunkCopyCommand}.

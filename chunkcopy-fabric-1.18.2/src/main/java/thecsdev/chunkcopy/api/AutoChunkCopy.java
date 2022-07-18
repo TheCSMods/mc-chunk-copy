@@ -12,49 +12,56 @@ import thecsdev.chunkcopy.ChunkCopy;
 public class AutoChunkCopy
 {
 	// ==================================================
+	public enum ACCMode { Copying, Pasting }
+	
 	@Nullable
 	private static String FileName = null;
+	private static ACCMode AutoChunkCopyMode = null;
 	// ==================================================
 	/**
 	 * Returns the fileName of where the chunks are
-	 * currently being auto-copied to. Returns null if
-	 * auto-copying is currently not running.
+	 * currently being auto copied or pasted. Returns null if
+	 * {@link AutoChunkCopy} is currently not running.
 	 */
 	@Nullable
-	public static String getFileName() { validate(); return FileName; }
+	public static String getFileName() { return AutoChunkCopyMode != null ? FileName : null; }
 	
 	/**
 	 * Returns true if auto-copying is currently running.
 	 */
-	public static boolean isRunning() { return validate() && !StringUtils.isAllBlank(FileName); }
+	private static boolean isRunning() { return validate() && AutoChunkCopyMode != null && !StringUtils.isAllBlank(FileName); }
+	public static boolean isCopying() { return isRunning() && AutoChunkCopyMode == ACCMode.Copying; }
+	public static boolean isPasting() { return isRunning() && AutoChunkCopyMode == ACCMode.Pasting; }
 	// --------------------------------------------------
-	public static boolean start(String fileName)
+	public static boolean start(String fileName, ACCMode mode)
 	{
-		//validate
-		if(!validate() /*|| isRunning()*/) return false;
+		//validate instance
+		if(!validate()) return false;
 		
 		//validate fileName with regex
 		if(!fileName.matches("^[\\w\\-. ]+$")) return false;
 		
 		//start
-		ChunkCopy.LOGGER.info("Started auto-copying chunks to '" + fileName + "'.");
+		ChunkCopy.LOGGER.info("Started AutoChunkCopy; Mode: '" + mode.name() + "'; File: '" + fileName + "';");
+		AutoChunkCopyMode = mode;
 		FileName = fileName;
 		return true;
 	}
 	
 	public static void stop()
 	{
-		//check if already stopped
-		if(!isRunning()) return;
+		//log if running
+		if(isRunning())
+			ChunkCopy.LOGGER.info("Stopped AutoChunkCopy; Mode: '" + AutoChunkCopyMode.name() + "'; File: '" + FileName + "';");
 		
 		//stop
-		ChunkCopy.LOGGER.info("Stopped auto-copying chunks.");
+		AutoChunkCopyMode = null;
 		FileName = null;
 	}
 	// ==================================================
 	public static boolean validate()
 	{
-		if(!(ChunkCopy.validateInstance() && ChunkCopy.isClient()))
+		if(!ChunkCopy.validateInstance() || !ChunkCopy.isClient())
 		{
 			FileName = null;
 			return false;

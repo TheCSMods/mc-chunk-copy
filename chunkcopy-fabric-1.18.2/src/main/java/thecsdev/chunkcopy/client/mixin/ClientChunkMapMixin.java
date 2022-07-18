@@ -28,8 +28,8 @@ public abstract class ClientChunkMapMixin
 	@Inject(method = "set", at = @At("TAIL"))
 	protected void set(int index, @Nullable WorldChunk chunk, CallbackInfo callback)
 	{
-		//check if auto-copy is running
-		if(!AutoChunkCopy.isRunning()) return;
+		//check if auto-copy is copying
+		if(!AutoChunkCopy.isCopying()) return;
 		
 		//ignore null chunks
 		if(chunk == null) return;
