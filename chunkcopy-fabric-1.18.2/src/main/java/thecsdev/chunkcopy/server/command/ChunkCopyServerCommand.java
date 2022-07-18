@@ -8,6 +8,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.ChunkPos;
 import thecsdev.chunkcopy.api.AutoChunkCopy.ACCMode;
+import thecsdev.chunkcopy.api.AutoChunkCopy;
 import thecsdev.chunkcopy.api.ChunkCopyAPI;
 import thecsdev.chunkcopy.api.ChunkCopyUtils;
 import thecsdev.chunkcopy.command.ChunkCopyCommand;
@@ -130,6 +131,7 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 		//send feedback
 		String feedback = "[Chunk Copy] AutoChunkCopy is not available server-side.";
 		commandSource.sendFeedback(new LiteralText(feedback), false);
+		AutoChunkCopy.stop();
 	}
 	// ==================================================
 	private static boolean isOpAndHuman(ServerCommandSource src)
