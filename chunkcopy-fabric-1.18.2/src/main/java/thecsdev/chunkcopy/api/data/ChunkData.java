@@ -53,7 +53,8 @@ public final class ChunkData implements ChunkDataIO
 	}
 	// --------------------------------------------------
 	@Override
-	public void pasteData(ServerWorld world, ChunkPos chunkPos)
+	public void pasteData(ServerWorld world, ChunkPos chunkPos) { pasteData(world, chunkPos, true); }
+	public void pasteData(ServerWorld world, ChunkPos chunkPos, boolean updateClients)
 	{
 		world.getServer().execute(() ->
 		{
@@ -63,7 +64,7 @@ public final class ChunkData implements ChunkDataIO
 				try
 				{
 					chunkDataBlock.pasteData(world, chunkPos);
-					chunkDataBlock.updateClients(world, chunkPos);
+					if(updateClients) chunkDataBlock.updateClients(world, chunkPos);
 				}
 				catch(Exception e) { /*TODO - HANDLE EXCEPTION*/ }
 		});

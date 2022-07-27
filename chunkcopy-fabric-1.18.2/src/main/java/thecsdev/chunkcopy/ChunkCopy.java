@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import thecsdev.chunkcopy.api.AutoChunkCopy;
+import thecsdev.chunkcopy.api.ChunkCopyAPI;
 import thecsdev.chunkcopy.api.config.ChunkCopyConfig;
 import thecsdev.chunkcopy.api.data.ChunkData;
 import thecsdev.chunkcopy.api.data.block.CDBChunkSections;
@@ -51,6 +54,28 @@ public abstract class ChunkCopy
 		ChunkData.registerChunkDataBlockType(CDBChunkSections.class);
 		ChunkData.registerChunkDataBlockType(CDBEntityBlocksLegacy.class);
 		ChunkData.registerChunkDataBlockType(CDBEntitiesLegacy.class);
+		
+		//register auto-paste handler
+		ServerChunkEvents.CHUNK_LOAD.register((sWorld, sChunk) ->
+		{
+			//check if auto-copy is pasting
+			if(!AutoChunkCopy.isPasting()) return;
+			
+			//turn the action into a Runnable task
+			Runnable task = () ->
+			{
+				try
+				{
+					//paste data into the chunk
+					final String fileName = AutoChunkCopy.getFileName();
+					ChunkCopyAPI.loadChunkDataIO(sWorld, sChunk.getPos(), fileName, false);
+				}
+				catch(Exception exc) {}
+			};
+			
+			//let the server execute the task once it is able to
+			sWorld.getServer().execute(task);
+		});
 	}
 	// --------------------------------------------------
 	public static String getModName() { return ModName; }

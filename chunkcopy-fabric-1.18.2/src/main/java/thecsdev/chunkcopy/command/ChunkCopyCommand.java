@@ -64,10 +64,10 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 				
 				//auto-copying
 				.then(literal("auto").requires(arg -> AutoChunkCopy.validate())
-						.then(literal("startCopying").requires(arg -> canCopy(arg))
+						.then(literal("copy").requires(arg -> canCopy(arg))
 								.then(argument("fileName", CopiedChunksArgumentType.forCopying())
 										.executes(arg -> exec_autoChunkCopy_start_fileName(arg, ACCMode.Copying))))
-						.then(literal("startPasting").requires(arg -> canPaste(arg))
+						.then(literal("paste").requires(arg -> canPaste(arg))
 								.then(argument("fileName", CopiedChunksArgumentType.forPasting())
 										.executes(arg -> exec_autoChunkCopy_start_fileName(arg, ACCMode.Pasting))))
 						.then(literal("stop")

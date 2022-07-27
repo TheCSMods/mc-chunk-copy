@@ -27,9 +27,9 @@ public class AutoChunkCopy
 	public static String getFileName() { return AutoChunkCopyMode != null ? FileName : null; }
 	
 	/**
-	 * Returns true if auto-copying is currently running.
+	 * Returns true if auto-copying is currently running and doing anything.
 	 */
-	private static boolean isRunning() { return validate() && AutoChunkCopyMode != null && !StringUtils.isAllBlank(FileName); }
+	public static boolean isRunning() { return validate() && AutoChunkCopyMode != null && !StringUtils.isAllBlank(FileName); }
 	public static boolean isCopying() { return isRunning() && AutoChunkCopyMode == ACCMode.Copying; }
 	public static boolean isPasting() { return isRunning() && AutoChunkCopyMode == ACCMode.Pasting; }
 	// --------------------------------------------------

@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
@@ -17,14 +16,6 @@ import thecsdev.chunkcopy.api.ChunkCopyAPI;
 public abstract class ClientChunkMapMixin
 {
 	// ==================================================
-	private ClientChunkManager chunkCopy_chunkManager;
-	// ==================================================
-	@Inject(method = "<init>", at = @At("TAIL"))
-	private void construct(ClientChunkManager clientChunkManager, int radius, CallbackInfo ci)
-	{
-		chunkCopy_chunkManager = clientChunkManager;
-	}
-	
 	@Inject(method = "set", at = @At("TAIL"))
 	protected void set(int index, @Nullable WorldChunk chunk, CallbackInfo callback)
 	{
@@ -37,7 +28,7 @@ public abstract class ClientChunkMapMixin
 		//save chunk
 		try
 		{
-			World world = (World) chunkCopy_chunkManager.getWorld();
+			World world = (World) chunk.getWorld();
 			ChunkPos chunkPos = chunk.getPos();
 			String fileName = AutoChunkCopy.getFileName();
 			
