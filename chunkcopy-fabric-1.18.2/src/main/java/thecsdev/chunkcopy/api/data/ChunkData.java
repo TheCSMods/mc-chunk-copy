@@ -66,7 +66,7 @@ public final class ChunkData implements ChunkDataIO
 					chunkDataBlock.pasteData(world, chunkPos);
 					if(updateClients) chunkDataBlock.updateClients(world, chunkPos);
 				}
-				catch(Exception e) { /*TODO - HANDLE EXCEPTION*/ }
+				catch(Exception e) {}
 		});
 	}
 	// ==================================================

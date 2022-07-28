@@ -131,12 +131,16 @@ public final class ChunkCopyAPI
 	 */
 	public static boolean loadChunkDataIO(ServerWorld world, ChunkPos chunkPos, String fileName, boolean updateClients) throws IOException
 	{
+		//make sure the chunk isn't null or empty
+		WorldChunk chunk = world.getChunk(chunkPos.x, chunkPos.z);
+		if(chunk == null || (chunk instanceof EmptyChunk)) return false;
+		
 		//get the file
 		File file = getChunkSaveFile(world, chunkPos, fileName);
 		if(!file.exists()) return false;
 		
 		//read
-		byte[] chunkData = FileUtils.readFileToByteArray(getChunkSaveFile(world, chunkPos, fileName));
+		byte[] chunkData = FileUtils.readFileToByteArray(file);
 		pasteChunkData(chunkData, world, chunkPos, updateClients);
 		return true;
 	}
