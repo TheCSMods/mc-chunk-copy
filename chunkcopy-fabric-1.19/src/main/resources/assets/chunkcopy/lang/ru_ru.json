@@ -4,8 +4,9 @@
 	"chunkcopy.feedback.copied": "[Chunk Copy] Данные чанков скопированы в папку \"%s\".",
 	"chunkcopy.feedback.pasted": "[Chunk Copy] Данные чанков вставлены из папки \"%s\".",
 	"chunkcopy.feedback.filled": "[Chunk Copy] Чанки заполнены блоком \"%s\".",
-	"chunkcopy.feedback.autocopy_start": "[Chunk Copy] Запущено автоматическое копирование данных чанков в папку \"%s\".",
-	"chunkcopy.feedback.autocopy_stop": "[Chunk Copy] Автоматическое копирование данных чанков завершено.",
+	"chunkcopy.feedback.autochunkcopy.start_copying": "[Chunk Copy] Запущено автоматическое копирование данных чанков в папку \"%s\".",
+	"chunkcopy.feedback.autochunkcopy.start_pasting": "[Chunk Copy] Запущена автоматическая вставка данных чанков из папки \"%s\".",
+	"chunkcopy.feedback.autochunkcopy.stop": "[Chunk Copy] Автоматическое копирование и вставка данных чанков завершено.",
 	
 	"chunkcopy.feedback.require_singleplayer": "[Chunk Copy] Для выполнения операции необходимо находиться в одиночной игре.",
 	"chunkcopy.feedback.paste_file_not_found": "[Chunk Copy] Не удалось вставить данные чанков из \"%s\": данные не обнаружены.",

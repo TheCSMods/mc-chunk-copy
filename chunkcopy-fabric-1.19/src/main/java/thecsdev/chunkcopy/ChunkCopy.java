@@ -7,6 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.minecraft.util.math.ChunkPos;
+import thecsdev.chunkcopy.api.AutoChunkCopy;
+import thecsdev.chunkcopy.api.ChunkCopyAPI;
 import thecsdev.chunkcopy.api.config.ChunkCopyConfig;
 import thecsdev.chunkcopy.api.data.ChunkData;
 import thecsdev.chunkcopy.api.data.block.CDBChunkSections;
@@ -51,6 +55,44 @@ public abstract class ChunkCopy
 		ChunkData.registerChunkDataBlockType(CDBChunkSections.class);
 		ChunkData.registerChunkDataBlockType(CDBEntityBlocksLegacy.class);
 		ChunkData.registerChunkDataBlockType(CDBEntitiesLegacy.class);
+		
+		//register auto-paste handler
+		ServerChunkEvents.CHUNK_LOAD.register((sWorld, sChunk) ->
+		{
+			//check if auto-copy is pasting
+			if(!AutoChunkCopy.isPasting()) return;
+			final ChunkPos scPos = sChunk.getPos();
+			
+			//convert the action into a task
+			final Runnable task = () ->
+			{
+				try
+				{
+					//paste data into the chunk
+					final String fileName = AutoChunkCopy.getFileName();
+					ChunkCopyAPI.loadChunkDataIO(sWorld, sChunk.getPos(), fileName);
+				}
+				catch(Exception exc) {}
+			};
+			
+			//run the task
+			new Thread(() ->
+			{
+				try
+				{
+					//wait a bit for the chunk to be fully ready
+					Thread.sleep(500);
+					
+					//make sure the chunk is fully ready
+					while(!sWorld.isChunkLoaded(scPos.x, scPos.z))
+						Thread.sleep(100);
+					
+					//run the task on this thread (pasting will be on the main server thread)
+					task.run();
+				}
+				catch (Exception e) {}
+			}).start();
+		});
 	}
 	// --------------------------------------------------
 	public static String getModName() { return ModName; }

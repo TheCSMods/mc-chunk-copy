@@ -16,6 +16,7 @@ import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import thecsdev.chunkcopy.ChunkCopy;
 import thecsdev.chunkcopy.api.AutoChunkCopy;
+import thecsdev.chunkcopy.api.AutoChunkCopy.ACCMode;
 import thecsdev.chunkcopy.command.argument.CopiedChunksArgumentType;
 
 /**
@@ -63,12 +64,15 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 										)))*/
 				
 				//auto-copying
-				.then(literal("autoCopy").requires(arg -> canCopy(arg) && AutoChunkCopy.validate())
-						.then(literal("start")
+				.then(literal("auto").requires(arg -> AutoChunkCopy.validate())
+						.then(literal("copy").requires(arg -> canCopy(arg))
 								.then(argument("fileName", CopiedChunksArgumentType.forCopying())
-										.executes(arg -> exec_autoCopy_start_fileName(arg))))
+										.executes(arg -> exec_autoChunkCopy_start_fileName(arg, ACCMode.Copying))))
+						.then(literal("paste").requires(arg -> canPaste(arg))
+								.then(argument("fileName", CopiedChunksArgumentType.forPasting())
+										.executes(arg -> exec_autoChunkCopy_start_fileName(arg, ACCMode.Pasting))))
 						.then(literal("stop")
-								.executes(arg -> exec_autoCopy_stop(arg)))
+								.executes(arg -> exec_autoChunkCopy_stop(arg)))
 						)
 				);
 	}
@@ -117,15 +121,15 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 		return 1;
 	}
 	// ---------------
-	private int exec_autoCopy_start_fileName(CommandContext<CS> cs)
+	private int exec_autoChunkCopy_start_fileName(CommandContext<CS> cs, ACCMode accMode)
 	{
-		autoCopyStart(cs.getSource(), cs.getArgument("fileName", String.class));
+		autoChunkCopyStart(cs.getSource(), cs.getArgument("fileName", String.class), accMode);
 		return 1;
 	}
 	
-	private int exec_autoCopy_stop(CommandContext<CS> cs)
+	private int exec_autoChunkCopy_stop(CommandContext<CS> cs)
 	{
-		autoCopyStop(cs.getSource());
+		autoChunkCopyStop(cs.getSource());
 		return 1;
 	}
 	// ---------------
@@ -184,8 +188,8 @@ public abstract class ChunkCopyCommand<CS extends CommandSource>
 	protected abstract void fill(CS commandSource, int chunkDistance, BlockState block);
 	protected final void clear(CS commandSource, int chunkDistance) { fill(commandSource, chunkDistance, Blocks.AIR.getDefaultState()); }
 	
-	protected abstract void autoCopyStart(CS commandSource, String fileName);
-	protected abstract void autoCopyStop(CS commandSource);
+	protected abstract void autoChunkCopyStart(CS commandSource, String fileName, ACCMode accMode);
+	protected abstract void autoChunkCopyStop(CS commandSource);
 	// ==================================================
 	/**
 	 * Creates a literal argument builder.

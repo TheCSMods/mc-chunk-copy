@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.BitSet;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -157,9 +156,9 @@ public class CDBBlocksLegacy extends ChunkDataBlock
 	{
 		WorldChunk wchunk = world.getChunk(chunkPos.x, chunkPos.z);
 		LightingProvider lp = world.getLightingProvider();
-		BitSet skyBits = new BitSet(0);
-		BitSet blockBits = new BitSet(0);
-		return new ChunkDataS2CPacket(wchunk, lp, skyBits, blockBits, true);
+		//BitSet skyBits = new BitSet(0);
+		//BitSet blockBits = new BitSet(0);
+		return new ChunkDataS2CPacket(wchunk, lp, null, null, true);
 	}
 	// ==================================================
 }

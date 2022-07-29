@@ -7,6 +7,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
+import thecsdev.chunkcopy.api.AutoChunkCopy;
+import thecsdev.chunkcopy.api.AutoChunkCopy.ACCMode;
 import thecsdev.chunkcopy.api.ChunkCopyAPI;
 import thecsdev.chunkcopy.api.ChunkCopyUtils;
 import thecsdev.chunkcopy.command.ChunkCopyCommand;
@@ -121,14 +123,18 @@ public final class ChunkCopyServerCommand extends ChunkCopyCommand<ServerCommand
 	}
 	// --------------------------------------------------
 	@Override
-	protected void autoCopyStart(ServerCommandSource commandSource, String fileName) { autoCopyStop(commandSource); }
+	protected void autoChunkCopyStart(ServerCommandSource commandSource, String fileName, ACCMode accMode)
+	{
+		autoChunkCopyStop(commandSource);
+	}
 	
 	@Override
-	protected void autoCopyStop(ServerCommandSource commandSource)
+	protected void autoChunkCopyStop(ServerCommandSource commandSource)
 	{
 		//send feedback
-		String feedback = "[Chunk Copy] Auto-copying is not available server-side.";
+		String feedback = "[Chunk Copy] AutoChunkCopy is not available server-side.";
 		commandSource.sendFeedback(Text.literal(feedback), false);
+		AutoChunkCopy.stop();
 	}
 	// ==================================================
 	private static boolean isOpAndHuman(ServerCommandSource src)
