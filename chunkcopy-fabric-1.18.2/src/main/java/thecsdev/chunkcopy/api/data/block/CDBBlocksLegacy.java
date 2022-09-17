@@ -120,10 +120,33 @@ public class CDBBlocksLegacy extends ChunkDataBlock
 	}
 	// --------------------------------------------------
 	@Override
-	public void updateClients(ServerWorld world, ChunkPos chunkPos)
+	public void updateClients(ServerWorld world, ChunkPos chunkPos) { updateClientsB(world, chunkPos); }
+	
+	public static void updateClientsB(ServerWorld world, ChunkPos chunkPos)
 	{
+		//update chunk lighting
+		updateChunkLighting(world, chunkPos);
+		
+		//create and send a chunk data packet to players
 		ChunkDataS2CPacket chunkData = makeMeAChunkDataPacketPls(world, chunkPos);
 		world.getPlayers().forEach(p -> p.networkHandler.sendPacket(chunkData));
+	}
+	
+	public static void updateChunkLighting(ServerWorld world, ChunkPos chunkPos)
+	{
+		LightingProvider light = world.getLightingProvider();
+		WorldChunk chunk = (WorldChunk)world.getChunk(chunkPos.x, chunkPos.z);
+		
+		int chunkWidthX = Math.abs(chunkPos.getEndX() - chunkPos.getStartX());
+		int chunkWidthZ = Math.abs(chunkPos.getEndZ() - chunkPos.getStartZ());
+		int y = chunk.getTopY();
+		
+		for(int x = 0; x < chunkWidthX; x++)
+		for(int z = 0; z < chunkWidthZ; z++)
+		{
+			BlockPos pos = chunkPos.getBlockPos(x, y, z);
+			light.checkBlock(pos);
+		}
 	}
 	// ==================================================
 	@Override

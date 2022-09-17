@@ -66,7 +66,7 @@ public class CDBChunkSections extends ChunkDataBlock
 	public void updateClients(ServerWorld world, ChunkPos chunkPos)
 	{
 		//use CDBBlocksLegacy's method of updating clients
-		new CDBBlocksLegacy().updateClients(world, chunkPos);
+		CDBBlocksLegacy.updateClientsB(world, chunkPos);
 	}
 	// ==================================================
 	@Override
